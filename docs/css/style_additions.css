@@ -49,3 +49,87 @@
   .info-message{margin-top:.2em}
   .info-updated,.info-source{margin-top:.2em}
 }
+
+
+/* =========================================
+   警報・自治体情報表示時のヘッダー重なり対策
+   GitHub Pages 本番用
+   ========================================= */
+
+/* コンテンツをヘッダー直下から配置し、
+   画面高さが不足してもヘッダーを押し出さない */
+.screen-content {
+  justify-content: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  padding-top: 2vh;
+}
+
+.screen-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* 各ブロックが勝手に縮んで表示が崩れないようにする */
+.alert-panel,
+.normal-panel,
+.municipal-section,
+.info-card,
+.meta-card {
+  flex-shrink: 0;
+}
+
+/* 警報パネルがヘッダー直下から始まる */
+.alert-panel {
+  margin-top: 0;
+}
+
+/* 縦型43インチなどのポートレート表示 */
+@media (orientation: portrait) {
+  .screen-content {
+    justify-content: flex-start;
+    padding-top: 1.8vh;
+    padding-bottom: 1.2vh;
+  }
+
+  .alert-panel {
+    margin-top: 0;
+  }
+}
+
+/* 画面高さが比較的小さい場合 */
+@media (max-height: 900px) {
+  .screen-content {
+    gap: 1vh;
+    padding-top: 1vh;
+  }
+
+  .state-banner {
+    margin-bottom: 1.5vh;
+  }
+
+  .main-description {
+    margin-top: 1vh;
+  }
+
+  .alert-panel {
+    padding-top: 0;
+    padding-bottom: 1.8vh;
+  }
+}
+
+/* 非常に高さが低い端末でもヘッダーとの重なりを防止 */
+@media (max-height: 650px) {
+  .screen-content {
+    padding-top: .6vh;
+    gap: .6vh;
+  }
+
+  .alert-panel {
+    padding-bottom: 1vh;
+  }
+
+  .state-banner {
+    margin-bottom: .8vh;
+  }
+}
