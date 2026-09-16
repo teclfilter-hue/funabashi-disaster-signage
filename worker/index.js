@@ -36,6 +36,7 @@ export default {
       return json({
         ok: true,
         service: "funabashi-disaster-api",
+        version: "2026-09-16-multi-area-v2",
         area: CONFIG.cityName,
         checkedAt: new Date().toISOString()
       });
@@ -173,7 +174,7 @@ function calcLevel(name, kind) {
 
   if (/特別警報/.test(s)) return 5;
   if (/危険警報/.test(s)) return 4;
-  if (/警報/.test(s)) return 4;
+  if (/警報/.test(s)) return 3;
   if (/注意報/.test(s)) return 2;
   return 1;
 }
@@ -348,7 +349,6 @@ async function fetchChibaHtml(url) {
   return await res.text();
 }
 
-// FUNABASHI_WORKER_FIX_20260916
 function findFunabashiDetailLinks(html) {
   const found = {
     evacuation: null,
@@ -413,15 +413,16 @@ function parseEvacuationPage(html, sourceUrl) {
     areaName: CONFIG.cityName,
     message: "現在、船橋市から発表されている避難情報はありません。",
     updatedAt: null,
-    sourceUrl: sourceUrl || null
+    sourceUrl: sourceUrl || null,
+    totalAreas: 0,
+    areas: [],
+    representativeAreas: []
   };
 
   if (!text) return result;
 
-  // 千葉県ポータルの詳細ページでは、
-  // 「市内全域：緊急安全確保 警戒レベル５ 発令」
-  // 「市内対象地域：高齢者等避難 警戒レベル３ 発令」
-  // のような記載が確認できる。
+  // 千葉県ポータルの詳細ページに記載される避難情報イベントを取得する。
+  // 1ページ内に複数地域・複数レベルがあるケースを前提に、全イベントを保持する。
   const eventRegex =
     /(市内全域|市内対象地域|[^\s：:]{1,60})\s*[：:]\s*(緊急安全確保|避難指示|高齢者等避難)\s+警戒レベル\s*([３４５]|[345])\s*(発令|解除)\s*\(\s*(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2})\s*\)/g;
 
@@ -433,15 +434,18 @@ function parseEvacuationPage(html, sourceUrl) {
     const levelRaw = m[3];
     const status = m[4];
     const updatedAt = m[5];
-    const level = Number(levelRaw.replace("３", "3").replace("４", "4").replace("５", "5"));
+    const level = Number(
+      levelRaw.replace("３", "3").replace("４", "4").replace("５", "5")
+    );
 
     events.push({ area, type, level, status, updatedAt });
   }
 
   if (!events.length) {
-    // 日付表記や空白差に耐える簡易検索
-    const simple =
-      text.match(/(緊急安全確保|避難指示|高齢者等避難)[^。]{0,100}(発令|解除)/);
+    // 日付表記や空白差に耐える簡易検索。
+    const simple = text.match(
+      /(緊急安全確保|避難指示|高齢者等避難)[^。]{0,100}(発令|解除)/
+    );
     if (!simple) return result;
 
     const type = simple[1];
@@ -453,30 +457,69 @@ function parseEvacuationPage(html, sourceUrl) {
     }
   }
 
-  // 同一ページ内で複数地域がある場合、解除より発令を優先し、
-  // 発令が複数なら最大レベル・最新時刻を採用。
-  events.sort((a, b) => {
-    const activeDiff = Number(b.status === "発令") - Number(a.status === "発令");
-    if (activeDiff) return activeDiff;
-    return b.level - a.level || String(b.updatedAt).localeCompare(String(a.updatedAt));
-  });
+  // 地域ごとの最新イベントを残す。
+  // 同一地域で「発令→解除」が並ぶ場合は、時刻が新しい方を採用する。
+  const latestByArea = new Map();
+  for (const event of events) {
+    const key = event.area;
+    const old = latestByArea.get(key);
+    if (
+      !old ||
+      String(event.updatedAt).localeCompare(String(old.updatedAt)) > 0 ||
+      (event.updatedAt === old.updatedAt && event.status === "発令" && old.status !== "発令")
+    ) {
+      latestByArea.set(key, event);
+    }
+  }
 
-  const current = events[0];
+  const activeAreas = [...latestByArea.values()]
+    .filter(x => x.status === "発令")
+    .sort((a, b) =>
+      b.level - a.level ||
+      String(b.updatedAt).localeCompare(String(a.updatedAt)) ||
+      String(a.area).localeCompare(String(b.area), "ja")
+    );
 
-  if (current.status === "解除") {
-    result.status = "解除";
-    result.updatedAt = current.updatedAt;
-    result.message = "現在、船橋市から発表されている避難情報はありません。";
+  if (!activeAreas.length) {
+    const latest = [...latestByArea.values()].sort((a, b) =>
+      String(b.updatedAt).localeCompare(String(a.updatedAt))
+    )[0];
+    if (latest) {
+      result.status = "解除";
+      result.updatedAt = latest.updatedAt;
+    }
     return result;
   }
 
+  const highest = activeAreas[0];
+  const representativeAreas = activeAreas.slice(0, 3);
+
   result.active = true;
-  result.level = current.level;
+  result.level = highest.level;
   result.status = "発令";
-  result.title = current.type;
-  result.updatedAt = current.updatedAt;
+  result.title = highest.type;
+  result.updatedAt = highest.updatedAt;
+  result.totalAreas = activeAreas.length;
+  result.areas = activeAreas.map(x => ({
+    name: x.area,
+    type: x.type,
+    level: x.level,
+    status: x.status,
+    updatedAt: x.updatedAt
+  }));
+  result.representativeAreas = representativeAreas.map(x => ({
+    name: x.area,
+    type: x.type,
+    level: x.level,
+    updatedAt: x.updatedAt
+  }));
+
+  const areaText = representativeAreas.map(x => x.area).join("、");
+  const moreText = activeAreas.length > representativeAreas.length
+    ? `ほか${activeAreas.length - representativeAreas.length}地域` : "";
+
   result.message =
-    `${current.area}：${current.type} 警戒レベル${current.level}が発令されています。`;
+    `${areaText}${moreText ? `（${moreText}）` : ""}：${highest.type} 警戒レベル${highest.level}が発令されています。`;
 
   return result;
 }
@@ -488,15 +531,15 @@ function parseShelterPage(html, sourceUrl) {
     active: false,
     count: 0,
     shelters: [],
+    representativeShelters: [],
     message: "現在、船橋市で開設中の避難所はありません。",
     sourceUrl: sourceUrl || null
   };
 
   if (!text) return result;
 
-  // 実際の千葉県ポータルで確認できる形式:
-  // 「船橋小学校：避難所 開設( 2026/08/13 19:00 )」
-  // 「船橋小学校：避難所 閉鎖( 2026/08/14 08:46 )」
+  // 千葉県ポータルの詳細ページでは、同一ページに複数施設の
+  // 「開設」「閉鎖」イベントが列挙されるため、施設単位で最新状態を確定する。
   const re =
     /([^：:]{1,50})\s*[：:]\s*避難所\s+(開設|閉鎖)\s*\(\s*(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2})\s*\)/g;
 
@@ -516,18 +559,25 @@ function parseShelterPage(html, sourceUrl) {
   const latestByName = new Map();
   for (const event of events) {
     const old = latestByName.get(event.name);
-    if (!old || String(event.updatedAt).localeCompare(String(old.updatedAt)) > 0) {
+    if (
+      !old ||
+      String(event.updatedAt).localeCompare(String(old.updatedAt)) > 0 ||
+      (event.updatedAt === old.updatedAt && event.status === "開設" && old.status !== "開設")
+    ) {
       latestByName.set(event.name, event);
     }
   }
 
   const active = [...latestByName.values()]
     .filter(x => x.status === "開設")
-    .sort((a, b) => String(a.name).localeCompare(String(b.name), "ja"));
+    .sort((a, b) =>
+      String(a.name).localeCompare(String(b.name), "ja")
+    );
 
   result.active = active.length > 0;
   result.count = active.length;
   result.shelters = active;
+  result.representativeShelters = active.slice(0, 3);
 
   if (active.length) {
     result.message = `現在、${active.length}か所の避難所が開設されています。`;
