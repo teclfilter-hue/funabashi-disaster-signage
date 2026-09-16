@@ -127,16 +127,15 @@
   function renderMeta(data){
     return `<section class="meta-card"><div class="meta-row"><span class="meta-label">気象情報</span><span>気象庁 警報・注意報データ</span></div><div class="meta-row"><span class="meta-label">自治体情報</span><span>千葉県防災ポータルサイト</span></div><div class="meta-row"><span class="meta-label">対象地域</span><span>千葉県船橋市</span></div>${data?.checkedAt?`<div class="meta-row source-row"><span class="meta-label">最終取得</span><span>${formatDate(data.checkedAt)}</span></div>`:''}</section>`;
   }
-  function renderFooter(){return `<footer class="footer"><span>船橋市 防災情報</span><span>安全確保を最優先してください</span></footer>`;}
 
   function render(state,data=null){
     document.body.className=state.cls;
-    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content">${state.level===0?renderNormal(state):renderAlert(state)}${renderChibaInfo()}${renderMeta(data)}</div>${renderFooter()}</div>`;
+    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content">${state.level===0?renderNormal(state):renderAlert(state)}${renderChibaInfo()}${renderMeta(data)}</div></div>`;
   }
 
   function renderError(message){
     latest={ok:false}; document.body.className='error';
-    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content"><section class="main-message error-panel"><div class="main-icon">!</div><div class="main-title">防災情報を取得できません</div><div class="main-description">${esc(message||'APIとの通信に失敗しました。')}</div><div class="retry-note">自動的に再取得します</div></section>${renderChibaInfo()}<section class="meta-card"><div class="meta-row"><span class="meta-label">対象地域</span><strong>千葉県船橋市</strong></div></section></div>${renderFooter()}</div>`;
+    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content"><section class="main-message error-panel"><div class="main-icon">!</div><div class="main-title">防災情報を取得できません</div><div class="main-description">${esc(message||'APIとの通信に失敗しました。')}</div><div class="retry-note">自動的に再取得します</div></section>${renderChibaInfo()}<section class="meta-card"><div class="meta-row"><span class="meta-label">対象地域</span><strong>千葉県船橋市</strong></div></section></div></div>`;
   }
 
   function applyWeather(data){
@@ -189,4 +188,20 @@
     timer=setInterval(()=>{fetchStatus();fetchChibaDisaster();},CONFIG.REFRESH_MS||30000);
   }
   init();
+})();
+
+
+/* 固定フッターの時刻表示 */
+(function () {
+  function updateFooterTime() {
+    const el = document.getElementById("footer-updated");
+    if (!el) return;
+    const d = new Date();
+    el.textContent =
+      "最終取得 " +
+      String(d.getHours()).padStart(2, "0") + ":" +
+      String(d.getMinutes()).padStart(2, "0");
+  }
+  updateFooterTime();
+  setInterval(updateFooterTime, 60000);
 })();
