@@ -1,226 +1,222 @@
 
-/* === 自治体・避難所情報 === */
-.municipal-section{display:flex;flex-direction:column;gap:1.2vh}
-.info-card{background:#fff;border-radius:20px;box-shadow:0 8px 22px rgba(0,30,60,.08);overflow:hidden;border:3px solid #dce8f1}
-.info-card.is-active{border-color:#d50072}
-.info-card.level-3.is-active{border-color:#d7a500}
-.info-card.level-4.is-active{border-color:#e65b16}
-.info-card.level-5.is-active{border-color:#d50072}
-.info-card-header{min-height:5vh;padding:1vh 2vw;display:flex;align-items:center;justify-content:space-between;gap:1vw;background:#edf5fa}
-.info-card.is-active .info-card-header{background:#fff0f7}
-.info-card.level-3.is-active .info-card-header{background:#fff9e5}
-.info-card.level-4.is-active .info-card-header{background:#fff3eb}
-.info-card-title{font-size:clamp(20px,2.1vw,32px);font-weight:900}
-.info-card-badge{padding:.3em .8em;border-radius:999px;background:#07548c;color:#fff;font-size:clamp(13px,1.35vw,21px);font-weight:900;white-space:nowrap}
-.info-card.is-active .info-card-badge{background:#d50072}
-.info-card.level-3.is-active .info-card-badge{background:#b58900}
-.info-card.level-4.is-active .info-card-badge{background:#c84c0e}
-.info-card-body{padding:1.3vh 2vw}
-.info-main-title{font-size:clamp(21px,2.25vw,34px);line-height:1.35;font-weight:900}
-.info-message{margin-top:.45em;font-size:clamp(15px,1.5vw,23px);line-height:1.5;font-weight:700}
-.info-updated,.info-source{margin-top:.5em;color:var(--muted);font-size:clamp(11px,1.05vw,17px);font-weight:700}
-.shelter-list{display:flex;flex-direction:column}
-.shelter-row{display:flex;align-items:center;justify-content:space-between;gap:1vw;padding:.6vh 0;border-bottom:1px solid #dce8f1}
-.shelter-row:last-child{border-bottom:0}
-.shelter-name{font-size:clamp(17px,1.7vw,27px);font-weight:900}
-.shelter-time{color:var(--muted);font-size:clamp(11px,1vw,16px);font-weight:700;white-space:nowrap}
-.shelter-more{margin-top:.45em;color:var(--muted);text-align:right;font-size:clamp(13px,1.2vw,19px);font-weight:900}
-.info-unavailable{border-color:#c8d3dc}
-.info-unavailable .info-card-header{background:#f0f3f5}
-.info-unavailable .info-card-badge{background:#66727c}
+/* =========================================================
+   防災サイネージ：情報を「代表2～3件＋QR詳細」に集約
+   43インチ縦型を主対象。本文はスクロールさせない。
+   ========================================================= */
 
-@media (orientation:portrait){
-  .municipal-section{gap:.9vh}
-  .info-card{border-radius:16px;border-width:2px}
-  .info-card-header{min-height:4.3vh;padding:.8vh 3vw}
-  .info-card-title{font-size:clamp(18px,4.6vw,30px)}
-  .info-card-badge{font-size:clamp(11px,2.8vw,18px)}
-  .info-card-body{padding:1vh 3vw}
-  .info-main-title{font-size:clamp(17px,4.3vw,28px)}
-  .info-message{font-size:clamp(13px,3.2vw,21px)}
-  .info-updated,.info-source{font-size:clamp(10px,2.5vw,15px)}
-  .shelter-name{font-size:clamp(15px,3.7vw,24px)}
-  .shelter-time{font-size:clamp(10px,2.4vw,14px)}
+.screen-shell{
+  position:relative !important;
+  display:block !important;
+  width:100% !important;
+  height:100% !important;
+  min-height:100% !important;
+  overflow:hidden !important;
 }
+
+.topbar{
+  position:absolute !important;
+  left:0;right:0;top:0;
+  height:10vh !important;
+  min-height:0 !important;
+  z-index:10;
+  flex:none !important;
+}
+
+.screen-content{
+  position:absolute !important;
+  left:0;right:0;
+  top:10vh !important;
+  bottom:5vh !important;
+  width:100% !important;
+  height:auto !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:1.5vh 4vw !important;
+  display:grid !important;
+  place-items:center !important;
+  overflow:hidden !important;
+  gap:0 !important;
+  z-index:1;
+}
+
+.footer{
+  position:absolute !important;
+  left:0;right:0;bottom:0;
+  height:5vh !important;
+  min-height:0 !important;
+  z-index:10;
+  flex:none !important;
+  overflow:hidden;
+}
+
+/* ---- 自治体情報の主表示 ---- */
+.disaster-primary{
+  width:min(94vw,1100px);
+  max-height:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 300px;
+  gap:3vw;
+  align-items:center;
+  padding:3.2vh 3vw;
+  border-radius:28px;
+  background:#fff;
+  box-shadow:0 12px 34px rgba(0,30,60,.14);
+  border:5px solid #dce8f1;
+  overflow:hidden;
+}
+
+.evacuation-primary.level-5{border-color:#d50072}
+.evacuation-primary.level-4{border-color:#e65b16}
+.evacuation-primary.level-3{border-color:#d7a500}
+.shelter-primary{border-color:#07548c}
+
+.disaster-copy{min-width:0}
+.disaster-kicker{
+  font-size:clamp(24px,3vw,44px);
+  font-weight:900;
+  letter-spacing:.04em;
+}
+.disaster-level{
+  margin-top:.25em;
+  font-size:clamp(38px,5.8vw,82px);
+  line-height:1.05;
+  font-weight:900;
+}
+.level-5 .disaster-level{color:#b30060}
+.level-4 .disaster-level{color:#c84c0e}
+.level-3 .disaster-level{color:#9a7600}
+.disaster-action{
+  margin-top:.25em;
+  font-size:clamp(42px,6.3vw,90px);
+  line-height:1.1;
+  font-weight:900;
+}
+.shelter-primary .disaster-action{color:#07548c}
+.shelter-count{
+  margin-top:.5em;
+  font-size:clamp(25px,3vw,43px);
+  font-weight:800;
+}
+.shelter-count strong{font-size:1.25em}
+
+.target-title{
+  margin-top:1.5vh;
+  padding-bottom:.25em;
+  border-bottom:3px solid #dce8f1;
+  font-size:clamp(20px,2.2vw,32px);
+  font-weight:900;
+}
+.target-list{
+  margin:.5em 0 0;
+  padding-left:1.3em;
+}
+.target-list li{
+  margin:.2em 0;
+  font-size:clamp(24px,2.8vw,42px);
+  line-height:1.25;
+  font-weight:900;
+}
+.more-note{
+  margin-top:.55em;
+  font-size:clamp(16px,1.7vw,25px);
+  line-height:1.35;
+  font-weight:800;
+}
+.disaster-updated{
+  margin-top:.7em;
+  color:var(--muted);
+  font-size:clamp(13px,1.3vw,20px);
+  font-weight:700;
+}
+
+/* ---- QR ---- */
+.qr-block{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+}
+.qr-image{
+  display:block;
+  width:min(26vw,300px);
+  height:min(26vw,300px);
+  max-width:300px;
+  max-height:300px;
+  padding:10px;
+  background:#fff;
+  border:1px solid #d5dde4;
+  border-radius:10px;
+}
+.qr-label{
+  margin-top:1vh;
+  text-align:center;
+  font-size:clamp(14px,1.45vw,22px);
+  line-height:1.35;
+  font-weight:700;
+}
+.qr-label strong{font-size:1.08em}
+
+/* ---- フッター情報は小さく固定 ---- */
+.footer{
+  padding:0 3vw !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+  gap:2vw;
+  font-size:clamp(11px,1.05vw,17px) !important;
+  font-weight:700;
+  white-space:nowrap;
+}
+.footer span{overflow:hidden;text-overflow:ellipsis}
+
+/* ---- 通常・気象警報も本文領域内に完全に収める ---- */
+.screen-content > .main-message{
+  width:min(94vw,1000px);
+  max-height:100%;
+  overflow:hidden;
+}
+.main-message .main-description{max-width:900px;margin-left:auto;margin-right:auto}
+
+/* test panelはデモ時だけ。実機では ?test=1 を付けない */
+.test-panel{z-index:30}
+
+/* 横型 */
+@media (orientation:landscape){
+  .topbar{height:11vh !important}
+  .screen-content{top:11vh !important;bottom:6vh !important;padding:2vh 4vw !important}
+  .footer{height:6vh !important}
+  .disaster-primary{grid-template-columns:minmax(0,1fr) 280px}
+}
+
+/* 狭い縦型ではQRを右側に残しつつサイズを抑える */
+@media (orientation:portrait) and (max-width:750px){
+  .disaster-primary{
+    grid-template-columns:minmax(0,1fr) 220px;
+    gap:2vw;
+    padding:2.2vh 3vw;
+    border-radius:20px;
+  }
+  .qr-image{width:190px;height:190px}
+  .target-list li{font-size:clamp(19px,5vw,30px)}
+}
+
+/* 低い画面でも本文を押し出さない */
+@media (max-height:900px){
+  .disaster-primary{padding:2vh 2.5vw;grid-template-columns:minmax(0,1fr) 240px}
+  .qr-image{width:220px;height:220px}
+  .target-title{margin-top:.8vh}
+  .target-list li{margin:.12em 0}
+}
+
 @media (max-height:650px){
-  .municipal-section{gap:.5vh}
-  .info-card-body{padding:.6vh 2vw}
-  .info-card-header{min-height:3.8vh;padding:.5vh 2vw}
-  .info-message{margin-top:.2em}
-  .info-updated,.info-source{margin-top:.2em}
-}
-
-
-/* =========================================
-   警報・自治体情報表示時のヘッダー重なり対策
-   GitHub Pages 本番用
-   ========================================= */
-
-/* コンテンツをヘッダー直下から配置し、
-   画面高さが不足してもヘッダーを押し出さない */
-.screen-content {
-  justify-content: flex-start;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  padding-top: 2vh;
-}
-
-.screen-content::-webkit-scrollbar {
-  display: none;
-}
-
-/* 各ブロックが勝手に縮んで表示が崩れないようにする */
-.alert-panel,
-.normal-panel,
-.municipal-section,
-.info-card,
-.meta-card {
-  flex-shrink: 0;
-}
-
-/* 警報パネルがヘッダー直下から始まる */
-.alert-panel {
-  margin-top: 0;
-}
-
-/* 縦型43インチなどのポートレート表示 */
-@media (orientation: portrait) {
-  .screen-content {
-    justify-content: flex-start;
-    padding-top: 1.8vh;
-    padding-bottom: 1.2vh;
-  }
-
-  .alert-panel {
-    margin-top: 0;
-  }
-}
-
-/* 画面高さが比較的小さい場合 */
-@media (max-height: 900px) {
-  .screen-content {
-    gap: 1vh;
-    padding-top: 1vh;
-  }
-
-  .state-banner {
-    margin-bottom: 1.5vh;
-  }
-
-  .main-description {
-    margin-top: 1vh;
-  }
-
-  .alert-panel {
-    padding-top: 0;
-    padding-bottom: 1.8vh;
-  }
-}
-
-/* 非常に高さが低い端末でもヘッダーとの重なりを防止 */
-@media (max-height: 650px) {
-  .screen-content {
-    padding-top: .6vh;
-    gap: .6vh;
-  }
-
-  .alert-panel {
-    padding-bottom: 1vh;
-  }
-
-  .state-banner {
-    margin-bottom: .8vh;
-  }
-}
-
-
-/* =========================================
-   FINAL FIX: ヘッダーと本文の重なりを構造的に防止
-   ========================================= */
-
-/*
- * screen-shell を「ヘッダー / 本文 / フッター」の3段構造に固定。
- * flex の高さ計算による押し出し・重なりを避ける。
- */
-.screen-shell {
-  display: grid !important;
-  grid-template-rows: auto minmax(0, 1fr) auto !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  overflow: hidden !important;
-}
-
-/* ヘッダーは必ず第1段に固定 */
-.topbar {
-  grid-row: 1;
-  position: relative !important;
-  z-index: 10 !important;
-  flex: none !important;
-  min-height: 11vh;
-}
-
-/* 本文は第2段だけを使用 */
-.screen-content {
-  grid-row: 2;
-  min-height: 0 !important;
-  height: 100% !important;
-  margin: 0 auto !important;
-  padding-top: 2vh !important;
-  padding-bottom: 2vh !important;
-  justify-content: flex-start !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  position: relative !important;
-  z-index: 1 !important;
-}
-
-/* フッターは第3段 */
-.footer {
-  grid-row: 3;
-  position: relative !important;
-  z-index: 10 !important;
-  flex: none !important;
-}
-
-/* 本文内の先頭ブロックに負の上方向マージンを許さない */
-.screen-content > * {
-  position: relative;
-  top: 0 !important;
-}
-
-/* 警報パネルの上端を明示 */
-.screen-content > .alert-panel,
-.screen-content > .main-message {
-  margin-top: 0 !important;
-}
-
-/* 縦型 */
-@media (orientation: portrait) {
-  .topbar {
-    min-height: 10vh;
-  }
-
-  .screen-content {
-    padding-top: 1.5vh !important;
-    padding-bottom: 1vh !important;
-  }
-}
-
-/* 高さが低い場合 */
-@media (max-height: 900px) {
-  .screen-content {
-    padding-top: 1vh !important;
-    padding-bottom: .8vh !important;
-    gap: .8vh !important;
-  }
-}
-
-/* さらに低い場合 */
-@media (max-height: 650px) {
-  .screen-content {
-    padding-top: .5vh !important;
-    padding-bottom: .5vh !important;
-    gap: .5vh !important;
-  }
+  .disaster-primary{padding:1vh 2vw;border-radius:18px}
+  .qr-image{width:170px;height:170px}
+  .disaster-kicker{font-size:22px}
+  .disaster-level{font-size:42px}
+  .disaster-action{font-size:48px}
+  .target-title{margin-top:.5vh;font-size:20px}
+  .target-list li{font-size:24px}
+  .more-note{font-size:14px}
+  .qr-label{font-size:12px}
 }
