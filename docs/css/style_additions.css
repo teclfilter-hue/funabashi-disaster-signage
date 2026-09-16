@@ -1,164 +1,249 @@
+/* =========================================================
+   船橋市 防災情報サイネージ
+   style_additions.css
+   最終版
+   ========================================================= */
 
-/* === 自治体・避難所情報 === */
-.municipal-section{display:flex;flex-direction:column;gap:1.2vh}
-.info-card{background:#fff;border-radius:20px;box-shadow:0 8px 22px rgba(0,30,60,.08);overflow:hidden;border:3px solid #dce8f1}
-.info-card.is-active{border-color:#d50072}
-.info-card.level-3.is-active{border-color:#d7a500}
-.info-card.level-4.is-active{border-color:#e65b16}
-.info-card.level-5.is-active{border-color:#d50072}
-.info-card-header{min-height:5vh;padding:1vh 2vw;display:flex;align-items:center;justify-content:space-between;gap:1vw;background:#edf5fa}
-.info-card.is-active .info-card-header{background:#fff0f7}
-.info-card.level-3.is-active .info-card-header{background:#fff9e5}
-.info-card.level-4.is-active .info-card-header{background:#fff3eb}
-.info-card-title{font-size:clamp(20px,2.1vw,32px);font-weight:900}
-.info-card-badge{padding:.3em .8em;border-radius:999px;background:#07548c;color:#fff;font-size:clamp(13px,1.35vw,21px);font-weight:900;white-space:nowrap}
-.info-card.is-active .info-card-badge{background:#d50072}
-.info-card.level-3.is-active .info-card-badge{background:#b58900}
-.info-card.level-4.is-active .info-card-badge{background:#c84c0e}
-.info-card-body{padding:1.3vh 2vw}
-.info-main-title{font-size:clamp(21px,2.25vw,34px);line-height:1.35;font-weight:900}
-.info-message{margin-top:.45em;font-size:clamp(15px,1.5vw,23px);line-height:1.5;font-weight:700}
-.info-updated,.info-source{margin-top:.5em;color:var(--muted);font-size:clamp(11px,1.05vw,17px);font-weight:700}
-.shelter-list{display:flex;flex-direction:column}
-.shelter-row{display:flex;align-items:center;justify-content:space-between;gap:1vw;padding:.6vh 0;border-bottom:1px solid #dce8f1}
-.shelter-row:last-child{border-bottom:0}
-.shelter-name{font-size:clamp(17px,1.7vw,27px);font-weight:900}
-.shelter-time{color:var(--muted);font-size:clamp(11px,1vw,16px);font-weight:700;white-space:nowrap}
-.shelter-more{margin-top:.45em;color:var(--muted);text-align:right;font-size:clamp(13px,1.2vw,19px);font-weight:900}
-.info-unavailable{border-color:#c8d3dc}
-.info-unavailable .info-card-header{background:#f0f3f5}
-.info-unavailable .info-card-badge{background:#66727c}
 
-@media (orientation:portrait){
-  .municipal-section{gap:.9vh}
-  .info-card{border-radius:16px;border-width:2px}
-  .info-card-header{min-height:4.3vh;padding:.8vh 3vw}
-  .info-card-title{font-size:clamp(18px,4.6vw,30px)}
-  .info-card-badge{font-size:clamp(11px,2.8vw,18px)}
-  .info-card-body{padding:1vh 3vw}
-  .info-main-title{font-size:clamp(17px,4.3vw,28px)}
-  .info-message{font-size:clamp(13px,3.2vw,21px)}
-  .info-updated,.info-source{font-size:clamp(10px,2.5vw,15px)}
-  .shelter-name{font-size:clamp(15px,3.7vw,24px)}
-  .shelter-time{font-size:clamp(10px,2.4vw,14px)}
+/* =========================================================
+   基本レイアウト
+   ========================================================= */
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
-@media (max-height:650px){
-  .municipal-section{gap:.5vh}
-  .info-card-body{padding:.6vh 2vw}
-  .info-card-header{min-height:3.8vh;padding:.5vh 2vw}
-  .info-message{margin-top:.2em}
-  .info-updated,.info-source{margin-top:.2em}
+
+body {
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 
-/* =========================================
-   警報・自治体情報表示時のヘッダー重なり対策
-   GitHub Pages 本番用
-   ========================================= */
+/* =========================================================
+   メインアプリ領域
+   ========================================================= */
 
-/* コンテンツをヘッダー直下から配置し、
-   画面高さが不足してもヘッダーを押し出さない */
-.screen-content {
-  justify-content: flex-start;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  padding-top: 2vh;
+/*
+  #app を height:100% にすると、
+  footer が画面の外へ押し出されるため、
+  flexで残りの高さを使用する。
+*/
+
+#app {
+  width: 100% !important;
+
+  flex: 1 1 auto !important;
+
+  min-height: 0 !important;
+
+  height: auto !important;
+
+  overflow: hidden !important;
 }
 
-.screen-content::-webkit-scrollbar {
-  display: none;
+
+/* =========================================================
+   フッター
+   ========================================================= */
+
+.footer {
+
+  /* 表示 */
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  /* 高さ */
+  flex: 0 0 42px !important;
+  width: 100% !important;
+  height: 42px !important;
+  min-height: 42px !important;
+
+  /* サイズ計算 */
+  box-sizing: border-box !important;
+
+  /* 余白 */
+  margin: 0 !important;
+  padding: 0 28px !important;
+
+  /* 配置 */
+  align-items: center !important;
+  justify-content: center !important;
+
+  /* 背景 */
+  background: #07548c !important;
+
+  /* 文字 */
+  color: rgba(255, 255, 255, 0.9) !important;
+
+  /* 重なり */
+  position: relative !important;
+  z-index: 9999 !important;
+
+  /* はみ出し */
+  overflow: hidden !important;
 }
 
-/* 各ブロックが勝手に縮んで表示が崩れないようにする */
-.alert-panel,
-.normal-panel,
-.municipal-section,
-.info-card,
+
+/* =========================================================
+   フッター内部
+   ========================================================= */
+
+.footer-info {
+
+  width: 100% !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: space-between !important;
+
+  gap: 20px !important;
+
+  white-space: nowrap !important;
+
+  font-size: 12px !important;
+
+  line-height: 1 !important;
+
+  font-weight: 400 !important;
+}
+
+
+/* =========================================================
+   フッター文字
+   ========================================================= */
+
+.footer-info span {
+
+  display: inline-block !important;
+
+  color: rgba(255, 255, 255, 0.9) !important;
+
+  font-size: 12px !important;
+
+  line-height: 1 !important;
+
+  font-weight: 400 !important;
+
+  visibility: visible !important;
+
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   既存の参照カード
+   ========================================================= */
+
+/*
+  今回は参照情報を画面下部のfooterに集約するため、
+  既存の大きなmeta-cardは非表示にする。
+*/
+
 .meta-card {
-  flex-shrink: 0;
+  display: none !important;
 }
 
-/* 警報パネルがヘッダー直下から始まる */
-.alert-panel {
-  margin-top: 0;
-}
 
-/* 縦型43インチなどのポートレート表示 */
+/* =========================================================
+   縦型ディスプレイ
+   ========================================================= */
+
 @media (orientation: portrait) {
-  .screen-content {
-    justify-content: flex-start;
-    padding-top: 1.8vh;
-    padding-bottom: 1.2vh;
+
+  .footer {
+
+    flex: 0 0 44px !important;
+
+    width: 100% !important;
+
+    height: 44px !important;
+
+    min-height: 44px !important;
+
+    padding: 0 24px !important;
   }
 
-  .alert-panel {
-    margin-top: 0;
+
+  .footer-info {
+
+    font-size: 11px !important;
+
+    gap: 12px !important;
+  }
+
+
+  .footer-info span {
+
+    font-size: 11px !important;
+
+    line-height: 1 !important;
   }
 }
 
-/* 画面高さが比較的小さい場合 */
-@media (max-height: 900px) {
-  .screen-content {
-    gap: 1vh;
-    padding-top: 1vh;
-  }
 
-  .state-banner {
-    margin-bottom: 1.5vh;
-  }
+/* =========================================================
+   高さが小さい画面
+   ========================================================= */
 
-  .main-description {
-    margin-top: 1vh;
-  }
-
-  .alert-panel {
-    padding-top: 0;
-    padding-bottom: 1.8vh;
-  }
-}
-
-/* 非常に高さが低い端末でもヘッダーとの重なりを防止 */
 @media (max-height: 650px) {
-  .screen-content {
-    padding-top: .6vh;
-    gap: .6vh;
+
+  .footer {
+
+    flex: 0 0 36px !important;
+
+    height: 36px !important;
+
+    min-height: 36px !important;
+
+    padding: 0 18px !important;
   }
 
-  .alert-panel {
-    padding-bottom: 1vh;
+
+  .footer-info {
+
+    font-size: 10px !important;
+
+    gap: 12px !important;
   }
 
-  .state-banner {
-    margin-bottom: .8vh;
+
+  .footer-info span {
+
+    font-size: 10px !important;
   }
 }
 
-/* Dynamic JMA alert display */
-.level-caption{font-size:clamp(24px,3.0vw,42px);font-weight:800;margin:.35em 0 .5em;letter-spacing:.03em}
 
-/* === 実運用向け情報階層・コンパクト表示 === */
-.screen-content{gap:1.2vh;}
-.alert-panel{box-shadow:0 12px 34px rgba(0,30,60,.14);}
-.alert-panel .main-description{max-width:860px;margin-left:auto;margin-right:auto;}
-.municipal-section{gap:.8vh;}
-.compact-status{border:2px solid #d8e3ea;box-shadow:none;background:#f7fafc;}
-.compact-row{display:flex;align-items:center;justify-content:space-between;gap:2vw;padding:1.25vh 2vw;}
-.compact-title{font-size:clamp(20px,2.1vw,31px);font-weight:900;color:#17384f;}
-.compact-value{font-size:clamp(17px,1.7vw,26px);font-weight:800;color:#536977;text-align:right;}
-.info-card.is-active{box-shadow:0 8px 22px rgba(0,30,60,.09);}
-.info-card-body{padding:1.1vh 2vw;}
-.representative-label{margin-bottom:.45em;font-size:clamp(14px,1.3vw,20px);font-weight:900;color:#536977;}
-.representative-list{display:flex;flex-wrap:wrap;gap:.5em .8em;}
-.representative-list span{display:inline-block;padding:.35em .75em;border-radius:999px;background:#eef5f9;font-size:clamp(15px,1.45vw,22px);font-weight:900;}
-@media (orientation:portrait){
- .screen-content{gap:.9vh;}
- .compact-row{padding:1vh 3vw;}
- .compact-title{font-size:clamp(18px,4.6vw,30px);}
- .compact-value{font-size:clamp(14px,3.5vw,21px);}
- .representative-label{font-size:clamp(12px,3vw,18px);}
- .representative-list span{font-size:clamp(14px,3.4vw,21px);}
- .info-card-body{padding:1vh 3vw;}
+/* =========================================================
+   非常に狭い横幅への対応
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .footer {
+
+    padding: 0 12px !important;
+  }
+
+
+  .footer-info {
+
+    gap: 8px !important;
+
+    font-size: 9px !important;
+  }
+
+
+  .footer-info span {
+
+    font-size: 9px !important;
+  }
 }
-/* When an alert is present, keep the weather panel visually dominant. */
-body.advisory .alert-panel,body.warning .alert-panel,body.danger .alert-panel,body.emergency .alert-panel{padding-bottom:2.4vh;}
