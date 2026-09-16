@@ -13,56 +13,36 @@
 
   <title>船橋市 防災情報サイネージ</title>
 
-  <!-- メインCSS -->
   <link rel="stylesheet" href="css/style.css">
-
-  <!-- 追加CSS -->
   <link rel="stylesheet" href="css/style_additions.css">
 </head>
 
 <body>
 
-  <!-- =========================================
-       防災情報メイン画面
-       ========================================= -->
+  <!-- 防災情報メイン画面 -->
   <main id="app" aria-live="polite"></main>
 
 
-  <!-- =========================================
-       下部参照情報フッター
-       ========================================= -->
+  <!-- 参照情報フッター -->
   <footer class="footer">
-
     <div class="footer-info">
 
-      <span>
-        情報提供：気象庁・千葉県防災ポータルサイト
-      </span>
+      <span>情報提供：気象庁・千葉県防災ポータルサイト</span>
 
-      <span>
-        対象地域：船橋市
-      </span>
+      <span>対象地域：船橋市</span>
 
-      <span id="footer-updated">
-        最終取得 --:--
-      </span>
+      <span id="footer-updated">最終取得 --:--</span>
 
     </div>
-
   </footer>
 
 
-  <!-- =========================================
-       JavaScript
-       ========================================= -->
-
+  <!-- メインJavaScript -->
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
 
 
-  <!-- =========================================
-       フッター時刻更新
-       ========================================= -->
+  <!-- フッター時刻更新 -->
   <script>
     (function () {
 
@@ -70,9 +50,7 @@
 
         const el = document.getElementById("footer-updated");
 
-        if (!el) {
-          return;
-        }
+        if (!el) return;
 
         const d = new Date();
 
@@ -83,10 +61,8 @@
           "最終取得 " + hh + ":" + mm;
       }
 
-      // 初回表示
       updateFooterTime();
 
-      // 1分ごとに更新
       setInterval(updateFooterTime, 60000);
 
     })();
