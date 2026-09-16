@@ -103,13 +103,20 @@
   function renderEvacuation(e){
     const active=!!e?.active, level=Number(e?.level||0);
     const label=level?`警戒レベル${level}`:'発令なし';
-    return `<section class="info-card evacuation-card ${active?'is-active level-'+level:'is-clear'}"><div class="info-card-header"><span class="info-card-title">避難情報</span><span class="info-card-badge">${esc(label)}</span></div><div class="info-card-body"><div class="info-main-title">${esc(e?.title||'避難情報')}</div><div class="info-message">${esc(e?.message||(active?'避難情報が発表されています。':'現在、船橋市から発表されている避難情報はありません。'))}</div>${e?.updatedAt?`<div class="info-updated">発令・更新日時：${formatDate(e.updatedAt)}</div>`:''}<div class="info-source">情報提供：千葉県防災ポータルサイト</div></div></section>`;
+    if(!active){
+      return `<section class="info-card compact-status is-clear"><div class="compact-row"><div class="compact-title">避難情報</div><div class="compact-value">現在、発令されていません</div></div></section>`;
+    }
+    const areas=Array.isArray(e?.representativeAreas)?e.representativeAreas:[];
+    return `<section class="info-card evacuation-card is-active level-${level}"><div class="info-card-header"><span class="info-card-title">避難情報</span><span class="info-card-badge">${esc(label)}</span></div><div class="info-card-body"><div class="info-main-title">${esc(e?.title||'避難情報')}</div><div class="info-message">${esc(e?.message||'避難情報が発表されています。')}</div>${areas.length?`<div class="representative-label">主な対象地域</div><div class="representative-list">${areas.slice(0,3).map(x=>`<span>${esc(typeof x==='string'?x:(x.name||x.areaName||''))}</span>`).join('')}</div>`:''}${e?.updatedAt?`<div class="info-updated">発令・更新日時：${formatDate(e.updatedAt)}</div>`:''}<div class="info-source">情報提供：千葉県防災ポータルサイト</div></div></section>`;
   }
 
   function renderShelters(s){
     const active=!!s?.active, list=Array.isArray(s?.shelters)?s.shelters:[];
     const rows=list.slice(0,3).map(x=>`<div class="shelter-row"><div class="shelter-name">${esc(x.name||x.facilityName||'避難所')}</div></div>`).join('');
-    return `<section class="info-card shelter-card ${active?'is-active':'is-clear'}"><div class="info-card-header"><span class="info-card-title">避難所開設情報</span><span class="info-card-badge">${active?`${Number(s?.count??list.length)}か所開設中`:'開設なし'}</span></div><div class="info-card-body">${active&&rows?`<div class="shelter-list">${rows}</div>${Number(s?.count??list.length)>3?`<div class="shelter-more">その他の開設状況・所在地は詳細情報をご確認ください</div>`:''}`:`<div class="info-main-title">現在、開設中の避難所はありません</div><div class="info-message">${esc(s?.message||'避難所の開設情報はありません。')}</div>`}<div class="info-source">情報提供：千葉県防災ポータルサイト</div></div></section>`;
+    if(!active){
+      return `<section class="info-card compact-status is-clear"><div class="compact-row"><div class="compact-title">避難所</div><div class="compact-value">現在、開設されていません</div></div></section>`;
+    }
+    return `<section class="info-card shelter-card is-active"><div class="info-card-header"><span class="info-card-title">避難所</span><span class="info-card-badge">${Number(s?.count??list.length)}か所開設中</span></div><div class="info-card-body">${rows?`<div class="representative-label">主な開設避難所</div><div class="shelter-list">${rows}</div>`:''}${Number(s?.count??list.length)>3?`<div class="shelter-more">その他の開設状況・所在地はQRコードからご確認ください</div>`:''}<div class="info-source">情報提供：千葉県防災ポータルサイト</div></div></section>`;
   }
 
   function renderChibaInfo(){
