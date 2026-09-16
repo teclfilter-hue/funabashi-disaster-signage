@@ -136,3 +136,29 @@
 
 /* Dynamic JMA alert display */
 .level-caption{font-size:clamp(24px,3.0vw,42px);font-weight:800;margin:.35em 0 .5em;letter-spacing:.03em}
+
+/* === 実運用向け情報階層・コンパクト表示 === */
+.screen-content{gap:1.2vh;}
+.alert-panel{box-shadow:0 12px 34px rgba(0,30,60,.14);}
+.alert-panel .main-description{max-width:860px;margin-left:auto;margin-right:auto;}
+.municipal-section{gap:.8vh;}
+.compact-status{border:2px solid #d8e3ea;box-shadow:none;background:#f7fafc;}
+.compact-row{display:flex;align-items:center;justify-content:space-between;gap:2vw;padding:1.25vh 2vw;}
+.compact-title{font-size:clamp(20px,2.1vw,31px);font-weight:900;color:#17384f;}
+.compact-value{font-size:clamp(17px,1.7vw,26px);font-weight:800;color:#536977;text-align:right;}
+.info-card.is-active{box-shadow:0 8px 22px rgba(0,30,60,.09);}
+.info-card-body{padding:1.1vh 2vw;}
+.representative-label{margin-bottom:.45em;font-size:clamp(14px,1.3vw,20px);font-weight:900;color:#536977;}
+.representative-list{display:flex;flex-wrap:wrap;gap:.5em .8em;}
+.representative-list span{display:inline-block;padding:.35em .75em;border-radius:999px;background:#eef5f9;font-size:clamp(15px,1.45vw,22px);font-weight:900;}
+@media (orientation:portrait){
+ .screen-content{gap:.9vh;}
+ .compact-row{padding:1vh 3vw;}
+ .compact-title{font-size:clamp(18px,4.6vw,30px);}
+ .compact-value{font-size:clamp(14px,3.5vw,21px);}
+ .representative-label{font-size:clamp(12px,3vw,18px);}
+ .representative-list span{font-size:clamp(14px,3.4vw,21px);}
+ .info-card-body{padding:1vh 3vw;}
+}
+/* When an alert is present, keep the weather panel visually dominant. */
+body.advisory .alert-panel,body.warning .alert-panel,body.danger .alert-panel,body.emergency .alert-panel{padding-bottom:2.4vh;}
