@@ -354,30 +354,48 @@ function findFunabashiDetailLinks(html) {
     shelter: null
   };
 
-  // 千葉県ポータルの詳細ページは PUB_VF_Detail_Hinan。
-  // リンク文字＋周辺テキストに「船橋市」「避難情報」「避難所情報」が
-  // 含まれるものを優先する。
-  const re = /<a\b[^>]*href=["']([^"']*PUB_VF_Detail_Hinan[^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
-  let match;
+  // PUB_VF_Detail_Hinan のリンクだけを文字列処理で抽出する。
+  // 正規表現で HTML 全体を解析せず、エスケープ由来のビルドエラーを避ける。
+  const source = String(html || "");
+  const marker = "PUB_VF_Detail_Hinan";
+  let cursor = 0;
 
-  while ((match = re.exec(html))) {
-    const href = toAbsoluteChibaUrl(decodeHtml(match[1]));
-    const label = normalizeHtmlText(match[2]);
-    const context = normalizeHtmlText(
-      html.slice(Math.max(0, match.index - 500), Math.min(html.length, re.lastIndex + 500))
+  while (cursor < source.length) {
+    const markerPos = source.indexOf(marker, cursor);
+    if (markerPos < 0) break;
+
+    const anchorStart = source.lastIndexOf("<a", markerPos);
+    const anchorEnd = source.indexOf(">", markerPos);
+    if (anchorStart < 0 || anchorEnd < 0) break;
+
+    const closeStart = source.indexOf("</a>", anchorEnd + 1);
+    if (closeStart < 0) break;
+
+    const openingTag = source.slice(anchorStart, anchorEnd + 1);
+    const labelHtml = source.slice(anchorEnd + 1, closeStart);
+    const context = source.slice(
+      Math.max(0, anchorStart - 500),
+      Math.min(source.length, closeStart + 500)
     );
 
-    const combined = `${label} ${context}`;
+    const hrefMatch = openingTag.match(/href\s*=\s*["']([^"']+)["']/i);
+    if (hrefMatch) {
+      const href = toAbsoluteChibaUrl(decodeHtml(hrefMatch[1]));
+      const label = normalizeHtmlText(labelHtml);
+      const combined = `${label} ${normalizeHtmlText(context)}`;
 
-    if (!combined.includes(CONFIG.cityName)) continue;
+      if (href && combined.includes(CONFIG.cityName)) {
+        if (!found.evacuation && /避難情報/.test(combined)) {
+          found.evacuation = href;
+        }
 
-    if (!found.evacuation && /避難情報/.test(combined)) {
-      found.evacuation = href;
+        if (!found.shelter && /避難所情報/.test(combined)) {
+          found.shelter = href;
+        }
+      }
     }
 
-    if (!found.shelter && /避難所情報/.test(combined)) {
-      found.shelter = href;
-    }
+    cursor = closeStart + 4;
   }
 
   return found;
