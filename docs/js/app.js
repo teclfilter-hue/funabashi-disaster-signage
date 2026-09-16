@@ -76,17 +76,20 @@
   function weatherDisplay(alert){
     if(!alert)return null;
     const level=levelForAlert(alert);
-    let warning=String(alert.title||'').replace(/^千葉県船橋市の/,'').replace(/^船橋市の/,'').trim();
+    let warning=String(alert.title||alert.type||'').replace(/^千葉県船橋市の/,'').replace(/^船橋市の/,'').trim();
     if(!warning) warning='気象警報・注意報';
-    let label={2:'注意報',3:'警報',4:'危険警報',5:'特別警報'}[level]||'';
+    const label={2:'注意報',3:'警報',4:'危険警報',5:'特別警報'}[level]||'';
     return {
-      level,label,warning,
-      title:warning,
-      message:alert.message||'最新の気象情報と自治体からの避難情報を確認してください。',
+      level,label,warning,title:warning,
+      message:alert.message||`${warning}が発表されています。今後の気象情報と自治体からの避難情報を確認してください。`,
       updatedAt:alert.updatedAt||alert.updateAt||null,
-      status:alert.status||'',
-      type:alert.type||''
+      status:alert.status||'',type:alert.type||''
     };
+  }
+
+  function weatherNames(alerts){
+    return alerts.slice(0,4).map(a=>String(a.title||a.type||'')
+      .replace(/^千葉県船橋市の/,'').replace(/^船橋市の/,'').trim()).filter(Boolean);
   }
 
   function renderHeader(){
@@ -97,7 +100,17 @@
   }
   function renderAlert(s){
     const w=s.weather||{};
-    return `<section class="main-message alert-panel"><div class="state-banner"><span class="state-icon">${s.icon}</span><span>${esc(w.title||s.title)}</span></div><div class="warning-name">${esc(w.warning||'気象警報・注意報')}</div><div class="level-caption">レベル${w.level||s.level} ${esc(w.label||s.label)}</div><div class="main-description">${esc(w.message||s.message)}</div>${w.updatedAt?`<div class="info-updated">発表・更新日時：${formatDate(w.updatedAt)}</div>`:''}</section>`;
+    const names=Array.isArray(s.weatherNames)?s.weatherNames:[];
+    return `<section class="main-message alert-panel">
+      <div class="state-banner"><span class="state-icon">${s.icon}</span><span>${esc(w.label||s.label)} 発表中</span></div>
+      <div class="weather-primary">
+        <div class="warning-name">${esc(w.warning||'気象警報・注意報')}</div>
+        <div class="level-caption">レベル${w.level||s.level}　${esc(w.label||s.label)}</div>
+        <div class="main-description">${esc(w.message||s.message)}</div>
+      </div>
+      ${names.length>1?`<div class="weather-list"><div class="weather-list-title">発表中の気象情報</div>${names.map((n,i)=>`<div class="weather-list-row"><span>${i===0?'●':'○'}</span><strong>${esc(n)}</strong></div>`).join('')}</div>`:''}
+      ${w.updatedAt?`<div class="info-updated">発表・更新日時：${formatDate(w.updatedAt)}</div>`:''}
+    </section>`;
   }
 
   function renderEvacuation(e){
@@ -116,7 +129,21 @@
     if(!active){
       return `<section class="info-card compact-status is-clear"><div class="compact-row"><div class="compact-title">避難所</div><div class="compact-value">現在、開設されていません</div></div></section>`;
     }
-    return `<section class="info-card shelter-card is-active"><div class="info-card-header"><span class="info-card-title">避難所</span><span class="info-card-badge">${Number(s?.count??list.length)}か所開設中</span></div><div class="info-card-body">${rows?`<div class="representative-label">主な開設避難所</div><div class="shelter-list">${rows}</div>`:''}${Number(s?.count??list.length)>3?`<div class="shelter-more">その他の開設状況・所在地はQRコードからご確認ください</div>`:''}<div class="info-source">情報提供：千葉県防災ポータルサイト</div></div></section>`;
+    const qrUrl=s?.sourceUrl||'https://www.bousai.pref.chiba.lg.jp/';
+    return `<section class="info-card shelter-card is-active">
+      <div class="info-card-header"><span class="info-card-title">避難所</span><span class="info-card-badge">${Number(s?.count??list.length)}か所開設中</span></div>
+      <div class="info-card-body shelter-body">
+        <div class="shelter-main">
+          ${rows?`<div class="representative-label">主な開設避難所（代表3か所）</div><div class="shelter-list">${rows}</div>`:''}
+          ${Number(s?.count??list.length)>3?`<div class="shelter-more">ほか${Number(s.count)-3}か所の開設情報があります</div>`:''}
+        </div>
+        <a class="shelter-qr" href="${esc(qrUrl)}" target="_blank" rel="noopener" aria-label="最新の避難所情報をQRコードで確認">
+          <img src="images/qr_shelter.png" alt="避難所情報QRコード">
+          <span>最新の避難所情報・所在地</span><small>スマートフォンで確認</small>
+        </a>
+      </div>
+      <div class="info-source">情報提供：千葉県防災ポータルサイト</div>
+    </section>`;
   }
 
   function renderChibaInfo(){
@@ -130,7 +157,8 @@
 
   function render(state,data=null){
     document.body.className=state.cls;
-    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content">${state.level===0?renderNormal(state):renderAlert(state)}${renderChibaInfo()}${renderMeta(data)}</div></div>`;
+    const viewState=(data && data.level)?{...state,weather:data,weatherNames:Array.isArray(data.weatherNames)?data.weatherNames:[]}:state;
+    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content">${viewState.level===0?renderNormal(viewState):renderAlert(viewState)}${renderChibaInfo()}${renderMeta(data)}</div></div>`;
   }
 
   function renderError(message){
@@ -143,7 +171,7 @@
     const alerts=getWeatherAlerts(data);
     const weather=weatherDisplay(alerts[0]||null);
     currentLevel=weather?.level||0;
-    render(states[currentLevel]||states[0],weather?{...weather,checkedAt:data.checkedAt}:{checkedAt:data.checkedAt});
+    render(states[currentLevel]||states[0],weather?{...weather,weatherNames:weatherNames(alerts),checkedAt:data.checkedAt}:{checkedAt:data.checkedAt});
   }
 
   async function fetchStatus(){
@@ -172,7 +200,17 @@
     clockTimer=setInterval(()=>{const el=document.getElementById('clock');if(el)el.textContent=nowText();},1000);
   }
 
-  function demoChiba(){return {ok:true,evacuation:{active:false,level:0,title:'避難情報',message:'現在、船橋市から発表されている避難情報はありません。'},shelters:{active:false,count:0,shelters:[],message:'現在、船橋市で開設中の避難所はありません。'}};}
+  function demoChiba(){const shelterDemo=params.get('shelter')==='1';return {ok:true,evacuation:{active:false,level:0,title:'避難情報',message:'現在、船橋市から発表されている避難情報はありません。'},shelters:shelterDemo?{active:true,count:5,shelters:[{name:'船橋市立船橋小学校'},{name:'船橋市立海神小学校'},{name:'船橋市立湊中学校'},{name:'船橋市立宮本小学校'},{name:'船橋市立西海神小学校'}],sourceUrl:'https://www.bousai.pref.chiba.lg.jp/'}:{active:false,count:0,shelters:[],message:'現在、船橋市で開設中の避難所はありません.'}};}
+
+  function demoWeather(level){
+    const n=Number(level);
+    if(![2,3,4,5].includes(n))return null;
+    const defaults={2:['雷注意報'],3:['大雨警報','雷注意報'],4:['大雨警報','洪水警報'],5:['大雨特別警報']};
+    const names=(params.get('weather')||'').split(',').map(x=>x.trim()).filter(Boolean);
+    const list=names.length?names:defaults[n];
+    const label={2:'注意報',3:'警報',4:'危険警報',5:'特別警報'}[n];
+    return {level:n,label,warning:list[0],title:list[0],message:`${list[0]}が発表されています。今後の気象情報と自治体からの避難情報を確認してください。`,updatedAt:new Date().toISOString(),weatherNames:list};
+  }
 
   function init(){
     startClock();
@@ -180,7 +218,8 @@
       chibaLatest=demoChiba();
       const n=Number(params.get('level'));
       currentLevel=[0,2,3,4,5].includes(n)?n:0;
-      render(states[currentLevel],{ok:true,checkedAt:new Date().toISOString()});
+      const demoWeatherData=demoWeather(currentLevel);
+      render(states[currentLevel],demoWeatherData?{...demoWeatherData,checkedAt:new Date().toISOString()}:{ok:true,checkedAt:new Date().toISOString()});
       return;
     }
     fetchStatus(); fetchChibaDisaster();
