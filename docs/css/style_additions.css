@@ -1,0 +1,51 @@
+
+/* === 自治体・避難所情報 === */
+.municipal-section{display:flex;flex-direction:column;gap:1.2vh}
+.info-card{background:#fff;border-radius:20px;box-shadow:0 8px 22px rgba(0,30,60,.08);overflow:hidden;border:3px solid #dce8f1}
+.info-card.is-active{border-color:#d50072}
+.info-card.level-3.is-active{border-color:#d7a500}
+.info-card.level-4.is-active{border-color:#e65b16}
+.info-card.level-5.is-active{border-color:#d50072}
+.info-card-header{min-height:5vh;padding:1vh 2vw;display:flex;align-items:center;justify-content:space-between;gap:1vw;background:#edf5fa}
+.info-card.is-active .info-card-header{background:#fff0f7}
+.info-card.level-3.is-active .info-card-header{background:#fff9e5}
+.info-card.level-4.is-active .info-card-header{background:#fff3eb}
+.info-card-title{font-size:clamp(20px,2.1vw,32px);font-weight:900}
+.info-card-badge{padding:.3em .8em;border-radius:999px;background:#07548c;color:#fff;font-size:clamp(13px,1.35vw,21px);font-weight:900;white-space:nowrap}
+.info-card.is-active .info-card-badge{background:#d50072}
+.info-card.level-3.is-active .info-card-badge{background:#b58900}
+.info-card.level-4.is-active .info-card-badge{background:#c84c0e}
+.info-card-body{padding:1.3vh 2vw}
+.info-main-title{font-size:clamp(21px,2.25vw,34px);line-height:1.35;font-weight:900}
+.info-message{margin-top:.45em;font-size:clamp(15px,1.5vw,23px);line-height:1.5;font-weight:700}
+.info-updated,.info-source{margin-top:.5em;color:var(--muted);font-size:clamp(11px,1.05vw,17px);font-weight:700}
+.shelter-list{display:flex;flex-direction:column}
+.shelter-row{display:flex;align-items:center;justify-content:space-between;gap:1vw;padding:.6vh 0;border-bottom:1px solid #dce8f1}
+.shelter-row:last-child{border-bottom:0}
+.shelter-name{font-size:clamp(17px,1.7vw,27px);font-weight:900}
+.shelter-time{color:var(--muted);font-size:clamp(11px,1vw,16px);font-weight:700;white-space:nowrap}
+.shelter-more{margin-top:.45em;color:var(--muted);text-align:right;font-size:clamp(13px,1.2vw,19px);font-weight:900}
+.info-unavailable{border-color:#c8d3dc}
+.info-unavailable .info-card-header{background:#f0f3f5}
+.info-unavailable .info-card-badge{background:#66727c}
+
+@media (orientation:portrait){
+  .municipal-section{gap:.9vh}
+  .info-card{border-radius:16px;border-width:2px}
+  .info-card-header{min-height:4.3vh;padding:.8vh 3vw}
+  .info-card-title{font-size:clamp(18px,4.6vw,30px)}
+  .info-card-badge{font-size:clamp(11px,2.8vw,18px)}
+  .info-card-body{padding:1vh 3vw}
+  .info-main-title{font-size:clamp(17px,4.3vw,28px)}
+  .info-message{font-size:clamp(13px,3.2vw,21px)}
+  .info-updated,.info-source{font-size:clamp(10px,2.5vw,15px)}
+  .shelter-name{font-size:clamp(15px,3.7vw,24px)}
+  .shelter-time{font-size:clamp(10px,2.4vw,14px)}
+}
+@media (max-height:650px){
+  .municipal-section{gap:.5vh}
+  .info-card-body{padding:.6vh 2vw}
+  .info-card-header{min-height:3.8vh;padding:.5vh 2vw}
+  .info-message{margin-top:.2em}
+  .info-updated,.info-source{margin-top:.2em}
+}
