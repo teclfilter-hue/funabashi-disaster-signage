@@ -1,6 +1,6 @@
 {
   "$schema": "https://developers.cloudflare.com/workers/wrangler/config-schema.json",
-  "name": "funabashi-disaster-api",
+  "name": "funabashi-disaster-signage",
   "main": "index.js",
   "compatibility_date": "2026-08-28"
 }
