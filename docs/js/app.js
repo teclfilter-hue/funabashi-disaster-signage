@@ -189,19 +189,3 @@
   }
   init();
 })();
-
-
-/* 固定フッターの時刻表示 */
-(function () {
-  function updateFooterTime() {
-    const el = document.getElementById("footer-updated");
-    if (!el) return;
-    const d = new Date();
-    el.textContent =
-      "最終取得 " +
-      String(d.getHours()).padStart(2, "0") + ":" +
-      String(d.getMinutes()).padStart(2, "0");
-  }
-  updateFooterTime();
-  setInterval(updateFooterTime, 60000);
-})();
