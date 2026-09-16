@@ -133,3 +133,94 @@
     margin-bottom: .8vh;
   }
 }
+
+
+/* =========================================
+   FINAL FIX: ヘッダーと本文の重なりを構造的に防止
+   ========================================= */
+
+/*
+ * screen-shell を「ヘッダー / 本文 / フッター」の3段構造に固定。
+ * flex の高さ計算による押し出し・重なりを避ける。
+ */
+.screen-shell {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* ヘッダーは必ず第1段に固定 */
+.topbar {
+  grid-row: 1;
+  position: relative !important;
+  z-index: 10 !important;
+  flex: none !important;
+  min-height: 11vh;
+}
+
+/* 本文は第2段だけを使用 */
+.screen-content {
+  grid-row: 2;
+  min-height: 0 !important;
+  height: 100% !important;
+  margin: 0 auto !important;
+  padding-top: 2vh !important;
+  padding-bottom: 2vh !important;
+  justify-content: flex-start !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* フッターは第3段 */
+.footer {
+  grid-row: 3;
+  position: relative !important;
+  z-index: 10 !important;
+  flex: none !important;
+}
+
+/* 本文内の先頭ブロックに負の上方向マージンを許さない */
+.screen-content > * {
+  position: relative;
+  top: 0 !important;
+}
+
+/* 警報パネルの上端を明示 */
+.screen-content > .alert-panel,
+.screen-content > .main-message {
+  margin-top: 0 !important;
+}
+
+/* 縦型 */
+@media (orientation: portrait) {
+  .topbar {
+    min-height: 10vh;
+  }
+
+  .screen-content {
+    padding-top: 1.5vh !important;
+    padding-bottom: 1vh !important;
+  }
+}
+
+/* 高さが低い場合 */
+@media (max-height: 900px) {
+  .screen-content {
+    padding-top: 1vh !important;
+    padding-bottom: .8vh !important;
+    gap: .8vh !important;
+  }
+}
+
+/* さらに低い場合 */
+@media (max-height: 650px) {
+  .screen-content {
+    padding-top: .5vh !important;
+    padding-bottom: .5vh !important;
+    gap: .5vh !important;
+  }
+}
