@@ -1,363 +1,67 @@
-/* =========================================================
-   船橋市 防災情報サイネージ
-   style_additions.css
-   縦型本番用：既存メインレイアウトを壊さず、
-   レベル色・避難情報カード・フッターのみ補完
-   ========================================================= */
+/* 船橋市 防災サイネージ：追加表示専用CSS */
 
-/* ---------- 警報レベル色 ---------- */
-body.normal .normal-panel {
-  border-top-color: var(--normal) !important;
-}
-body.normal .main-icon {
-  background: var(--normal) !important;
-}
+/* レベル別カラー */
+body.normal .state-banner { background: var(--normal); }
+body.advisory .state-banner { background: var(--advisory); }
+body.warning .state-banner { background: var(--warning); }
+body.danger .state-banner { background: var(--danger); }
+body.emergency .state-banner { background: var(--emergency); }
+body.advisory .alert-panel { border-color: var(--advisory); }
+body.warning .alert-panel { border-color: var(--warning); }
+body.danger .alert-panel { border-color: var(--danger); }
+body.emergency .alert-panel { border-color: var(--emergency); }
 
-body.advisory .alert-panel {
-  border-color: var(--advisory) !important;
-}
-body.advisory .state-banner {
-  background: var(--advisory) !important;
-}
-body.advisory .warning-name {
-  color: var(--advisory) !important;
-}
-body.advisory .level-caption {
-  color: var(--advisory) !important;
-}
+.level-caption { margin-top: 1.2vh; font-size: clamp(20px,2.3vw,34px); font-weight: 900; }
+.weather-primary .main-description { margin-top: 1.2vh; }
+.weather-list { margin-top: 2vh; padding: 1.5vh 2vw; border-radius: 16px; background: #f3f7fa; text-align:left; }
+.weather-list-title { font-size: clamp(16px,1.5vw,24px); font-weight:800; color:#557087; margin-bottom:.6vh; }
+.weather-list-row { display:flex; gap:.7em; align-items:center; padding:.35vh 0; font-size:clamp(18px,2vw,30px); }
 
-body.warning .alert-panel {
-  border-color: var(--warning) !important;
-}
-body.warning .state-banner {
-  background: var(--warning) !important;
-}
-body.warning .warning-name {
-  color: var(--warning) !important;
-}
-body.warning .level-caption {
-  color: var(--warning) !important;
-}
+.info-card { background:#fff; border-radius:22px; box-shadow:0 8px 22px rgba(0,30,60,.10); overflow:hidden; }
+.info-card-header { display:flex; justify-content:space-between; align-items:center; padding:1.3vh 2vw; background:#eaf3f9; }
+.info-card-title { font-size:clamp(20px,2.2vw,34px); font-weight:900; }
+.info-card-badge { font-size:clamp(16px,1.7vw,26px); font-weight:900; padding:.5vh 1vw; border-radius:999px; background:#07548c; color:#fff; }
+.info-card-body { padding:1.4vh 2vw; }
+.shelter-body { display:flex; gap:2vw; align-items:center; }
+.shelter-main { flex:1; min-width:0; }
+.representative-label { font-size:clamp(14px,1.35vw,22px); font-weight:800; color:#557087; margin-bottom:.5vh; }
+.shelter-row { padding:.6vh 0; border-bottom:1px solid #dce8f1; }
+.shelter-row:last-child { border-bottom:0; }
+.shelter-name { font-size:clamp(19px,2vw,31px); font-weight:900; }
+.shelter-more { margin-top:.8vh; font-size:clamp(13px,1.25vw,20px); color:#557087; }
+.shelter-qr { flex:0 0 auto; width:clamp(110px,13vw,180px); text-align:center; text-decoration:none; color:#09233d; }
+.shelter-qr img { display:block; width:100%; aspect-ratio:1; object-fit:contain; background:#fff; border:8px solid #fff; box-shadow:0 3px 12px rgba(0,0,0,.15); }
+.shelter-qr span { display:block; margin-top:.5vh; font-size:clamp(12px,1.2vw,18px); font-weight:900; line-height:1.2; }
+.shelter-qr small { display:block; margin-top:.2vh; font-size:clamp(10px,1vw,15px); color:#557087; }
+.info-source { padding:0 2vw 1vh; font-size:10px; color:#718391; text-align:right; }
+.compact-status { padding:1.2vh 2vw; }
+.compact-row { display:flex; justify-content:space-between; align-items:center; gap:1vw; }
+.compact-title { font-size:clamp(20px,2vw,31px); font-weight:900; }
+.compact-value { font-size:clamp(16px,1.6vw,25px); font-weight:700; color:#557087; }
 
-body.danger .alert-panel {
-  border-color: var(--danger) !important;
-}
-body.danger .state-banner {
-  background: var(--danger) !important;
-}
-body.danger .warning-name {
-  color: var(--danger) !important;
-}
-body.danger .level-caption {
-  color: var(--danger) !important;
-}
+.footer { position:fixed !important; left:0 !important; right:0 !important; bottom:0 !important; width:100% !important; height:38px !important; min-height:38px !important; padding:0 24px !important; display:flex !important; align-items:center !important; justify-content:center !important; background:#07548c !important; color:#fff !important; z-index:99999 !important; }
+.footer-info { width:100% !important; display:flex !important; justify-content:space-between !important; align-items:center !important; white-space:nowrap !important; font-size:10px !important; }
+.footer-info span { font-size:10px !important; color:#fff !important; }
 
-body.emergency .alert-panel {
-  border-color: var(--emergency) !important;
-}
-body.emergency .state-banner {
-  background: var(--emergency) !important;
-}
-body.emergency .warning-name {
-  color: var(--emergency) !important;
-}
-body.emergency .level-caption {
-  color: var(--emergency) !important;
-}
-
-/* 警報カードの共通表示 */
-.alert-panel {
-  border-radius: 28px !important;
-  overflow: hidden !important;
-}
-
-.level-caption {
-  margin-top: .8vh !important;
-  font-size: clamp(18px, 2vw, 30px) !important;
-  font-weight: 800 !important;
-}
-
-.info-updated {
-  margin-top: 1vh !important;
-  font-size: clamp(12px, 1.1vw, 18px) !important;
-  color: #718391 !important;
-}
-
-/* ---------- 避難情報・避難所 ---------- */
-.municipal-section {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr !important;
-  gap: 1.5vw !important;
-  width: 100% !important;
-}
-
-.info-card {
-  background: #fff !important;
-  border-radius: 20px !important;
-  box-shadow: 0 8px 22px rgba(0,30,60,.08) !important;
-  overflow: hidden !important;
-  border: 3px solid #dbe7ef !important;
-}
-
-.compact-status {
-  min-height: 100px !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-.compact-row {
-  width: 100% !important;
-  padding: 1.5vh 2vw !important;
-}
-
-.compact-title {
-  font-size: clamp(20px, 2vw, 30px) !important;
-  font-weight: 900 !important;
-  color: #09233d !important;
-}
-
-.compact-value {
-  margin-top: .5vh !important;
-  font-size: clamp(14px, 1.35vw, 21px) !important;
-  color: #557087 !important;
-}
-
-.info-card-header {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 1vw !important;
-  padding: 1.1vh 1.5vw !important;
-  background: #f1f6fa !important;
-}
-
-.info-card-title {
-  font-size: clamp(20px, 2vw, 30px) !important;
-  font-weight: 900 !important;
-}
-
-.info-card-badge {
-  padding: .35em .7em !important;
-  border-radius: 999px !important;
-  background: #dbe7ef !important;
-  color: #29485e !important;
-  font-size: clamp(12px, 1.15vw, 18px) !important;
-  font-weight: 800 !important;
-  white-space: nowrap !important;
-}
-
-.info-card-body {
-  padding: 1.1vh 1.5vw 1.3vh !important;
-}
-
-.info-main-title {
-  font-size: clamp(18px, 1.7vw, 26px) !important;
-  font-weight: 900 !important;
-}
-
-.info-message,
-.representative-list,
-.shelter-list,
-.shelter-more {
-  margin-top: .55vh !important;
-  font-size: clamp(13px, 1.2vw, 19px) !important;
-  line-height: 1.45 !important;
-}
-
-.representative-label {
-  margin-top: .8vh !important;
-  font-size: clamp(11px, 1vw, 16px) !important;
-  color: #718391 !important;
-  font-weight: 700 !important;
-}
-
-.representative-list span {
-  display: inline-block !important;
-  margin: .25em .3em .1em 0 !important;
-  padding: .2em .55em !important;
-  border-radius: 6px !important;
-  background: #eef4f8 !important;
-}
-
-.shelter-row {
-  padding: .35vh 0 !important;
-  border-bottom: 1px solid #e2ebf1 !important;
-}
-
-.shelter-row:last-child {
-  border-bottom: 0 !important;
-}
-
-.info-source {
-  margin-top: .7vh !important;
-  font-size: 10px !important;
-  line-height: 1.2 !important;
-  color: #7b8b96 !important;
-}
-
-/* 避難情報が発令されている場合は警戒レベル色を反映 */
-.evacuation-card.level-3 { border-color: var(--warning) !important; }
-.evacuation-card.level-3 .info-card-header { background: color-mix(in srgb, var(--warning) 12%, white) !important; }
-.evacuation-card.level-4 { border-color: var(--danger) !important; }
-.evacuation-card.level-4 .info-card-header { background: color-mix(in srgb, var(--danger) 12%, white) !important; }
-.evacuation-card.level-5 { border-color: var(--emergency) !important; }
-.evacuation-card.level-5 .info-card-header { background: color-mix(in srgb, var(--emergency) 12%, white) !important; }
-
-/* ---------- 参照カードは非表示 ---------- */
-.meta-card { display: none !important; }
-
-/* ---------- 固定フッター ---------- */
-.footer {
-  position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  height: 42px !important;
-  min-height: 42px !important;
-  box-sizing: border-box !important;
-  margin: 0 !important;
-  padding: 0 28px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: #07548c !important;
-  color: rgba(255,255,255,.9) !important;
-  font-size: 10px !important;
-  line-height: 1 !important;
-  font-weight: 400 !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  overflow: hidden !important;
-  z-index: 99999 !important;
-}
-
-.footer-info {
-  width: 100% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 14px !important;
-  white-space: nowrap !important;
-  font-size: 10px !important;
-  line-height: 1 !important;
-}
-
-.footer-info span {
-  display: inline-block !important;
-  color: rgba(255,255,255,.9) !important;
-  font-size: 10px !important;
-  line-height: 1 !important;
-  white-space: nowrap !important;
-}
-
-@media (orientation: portrait) {
-  .screen-content {
-    width: 92vw !important;
-    padding: 2vh 0 6vh !important;
-    gap: 1.5vh !important;
-    justify-content: flex-start !important;
-  }
-
-  .main-message {
-    padding: 2.4vh 4vw !important;
-  }
-
-  .main-icon {
-    width: 82px !important;
-    height: 82px !important;
-    font-size: 48px !important;
-    margin-bottom: 1vh !important;
-  }
-
-  .main-title {
-    font-size: clamp(25px, 5.5vw, 40px) !important;
-  }
-
-  .main-description {
-    font-size: clamp(15px, 3.2vw, 22px) !important;
-    line-height: 1.5 !important;
-    margin-top: 1vh !important;
-  }
-
-  .alert-panel {
-    padding: 0 4vw 2vh !important;
-  }
-
-  .state-banner {
-    margin: 0 -4vw 1.8vh !important;
-    padding: 1.5vh 3vw !important;
-    font-size: clamp(24px, 5.5vw, 40px) !important;
-  }
-
-  .warning-name {
-    font-size: clamp(25px, 5.8vw, 42px) !important;
-  }
-
-  .level-caption {
-    font-size: clamp(15px, 3vw, 21px) !important;
-  }
-
-  .municipal-section {
-    grid-template-columns: 1fr !important;
-    gap: 1vh !important;
-  }
-
-  .info-card {
-    border-radius: 16px !important;
-    border-width: 2px !important;
-  }
-
-  .compact-status {
-    min-height: 72px !important;
-  }
-
-  .compact-row {
-    padding: 1vh 4vw !important;
-  }
-
-  .compact-title,
-  .info-card-title {
-    font-size: clamp(18px, 4.5vw, 27px) !important;
-  }
-
-  .compact-value,
-  .info-message,
-  .representative-list,
-  .shelter-list,
-  .shelter-more {
-    font-size: clamp(13px, 3vw, 18px) !important;
-  }
-
-  .info-card-header {
-    padding: .9vh 4vw !important;
-  }
-
-  .info-card-body {
-    padding: .9vh 4vw 1vh !important;
-  }
-
-  .footer {
-    height: 44px !important;
-    min-height: 44px !important;
-    padding: 0 18px !important;
-  }
-
-  .footer-info,
-  .footer-info span {
-    font-size: 9px !important;
-  }
-}
-
-@media (max-height: 650px) {
-  .screen-content {
-    padding-top: 1vh !important;
-    padding-bottom: 5vh !important;
-    gap: 1vh !important;
-  }
-  .main-message { padding-top: 1.5vh !important; padding-bottom: 1.5vh !important; }
-  .municipal-section { gap: .7vh !important; }
-  .info-card-body { padding-top: .7vh !important; padding-bottom: .7vh !important; }
-  .footer { height: 36px !important; min-height: 36px !important; padding: 0 14px !important; }
-  .footer-info, .footer-info span { font-size: 8px !important; }
+@media (orientation:portrait) and (min-width:700px) {
+  .screen-content { width:90vw; padding-top:2vh; padding-bottom:5vh; gap:1.3vh; justify-content:flex-start; }
+  .topbar { min-height:10vh; padding:1.6vh 5vw; }
+  .brand-title { font-size:clamp(25px,4.6vw,44px); }
+  .brand-area { font-size:clamp(15px,2vw,22px); }
+  .main-message { padding:2vh 4vw; border-radius:22px; }
+  .main-icon { width:clamp(58px,10vw,100px); height:clamp(58px,10vw,100px); font-size:clamp(36px,6vw,70px); }
+  .main-title { font-size:clamp(26px,4.2vw,46px); }
+  .main-description { font-size:clamp(16px,2.1vw,25px); line-height:1.45; }
+  .alert-panel { padding:0 3vw 2vh; }
+  .state-banner { margin:0 -3vw 1.6vh; padding:1.3vh 2vw; font-size:clamp(24px,4.2vw,44px); }
+  .warning-name { font-size:clamp(26px,4.5vw,48px); }
+  .level-caption { font-size:clamp(18px,2.4vw,27px); }
+  .weather-list-row { font-size:clamp(17px,2.1vw,25px); }
+  .info-card-header { padding:1vh 2.5vw; }
+  .info-card-body { padding:1vh 2.5vw; }
+  .shelter-name { font-size:clamp(17px,2.2vw,25px); }
+  .shelter-qr { width:clamp(95px,16vw,150px); }
+  .info-source { font-size:9px; }
+  .footer { height:34px !important; min-height:34px !important; padding:0 3vw !important; }
+  .footer-info,.footer-info span { font-size:9px !important; }
 }
