@@ -357,7 +357,7 @@ function findFunabashiDetailLinks(html) {
   // 千葉県ポータルの詳細ページは PUB_VF_Detail_Hinan。
   // リンク文字＋周辺テキストに「船橋市」「避難情報」「避難所情報」が
   // 含まれるものを優先する。
-  const re = /<a\\b[^>]*href=["']([^"']*PUB_VF_Detail_Hinan[^"']*)["'][^>]*>([\\s\\S]*?)<\\/a>/gi;
+  const re = /<a\b[^>]*href=["']([^"']*PUB_VF_Detail_Hinan[^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
   let match;
 
   while ((match = re.exec(html))) {
@@ -404,7 +404,7 @@ function parseEvacuationPage(html, sourceUrl) {
   // 「市内対象地域：高齢者等避難 警戒レベル３ 発令」
   // のような記載が確認できる。
   const eventRegex =
-    /(市内全域|市内対象地域|[^\\s：:]{1,60})\\s*[：:]\\s*(緊急安全確保|避難指示|高齢者等避難)\\s+警戒レベル\\s*([３３4４5５]|[345])\\s*(発令|解除)\\s*\\(\\s*(\\d{4}\\/\\d{2}\\/\\d{2}\\s+\\d{2}:\\d{2})\\s*\\)/g;
+    /(市内全域|市内対象地域|[^\s：:]{1,60})\s*[：:]\s*(緊急安全確保|避難指示|高齢者等避難)\s+警戒レベル\s*([３４５]|[345])\s*(発令|解除)\s*\(\s*(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2})\s*\)/g;
 
   const events = [];
   let m;
@@ -414,7 +414,7 @@ function parseEvacuationPage(html, sourceUrl) {
     const levelRaw = m[3];
     const status = m[4];
     const updatedAt = m[5];
-    const level = Number(levelRaw.replace(/[３３]/g, "3").replace(/[４4]/g, "4").replace(/[５5]/g, "5"));
+    const level = Number(levelRaw.replace("３", "3").replace("４", "4").replace("５", "5"));
 
     events.push({ area, type, level, status, updatedAt });
   }
@@ -479,7 +479,7 @@ function parseShelterPage(html, sourceUrl) {
   // 「船橋小学校：避難所 開設( 2026/08/13 19:00 )」
   // 「船橋小学校：避難所 閉鎖( 2026/08/14 08:46 )」
   const re =
-    /([^：:]{1,50})\\s*[：:]\\s*避難所\\s+(開設|閉鎖)\\s*\\(\\s*(\\d{4}\\/\\d{2}\\/\\d{2}\\s+\\d{2}:\\d{2})\\s*\\)/g;
+    /([^：:]{1,50})\s*[：:]\s*避難所\s+(開設|閉鎖)\s*\(\s*(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2})\s*\)/g;
 
   const events = [];
   let m;
@@ -520,12 +520,12 @@ function parseShelterPage(html, sourceUrl) {
 function normalizeHtmlText(html) {
   return decodeHtml(
     String(html || "")
-      .replace(/<script[\\s\\S]*?<\\/script>/gi, " ")
-      .replace(/<style[\\s\\S]*?<\\/style>/gi, " ")
-      .replace(/<br\\s*\\/?>/gi, " ")
+      .replace(/<script[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ")
+      .replace(/<br\s*\/?>/gi, " ")
       .replace(/<[^>]+>/g, " ")
   )
-    .replace(/\\s+/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
