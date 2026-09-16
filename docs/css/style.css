@@ -104,3 +104,62 @@ button, a { font:inherit; }
 .meta-card {
   display: none !important;
 }
+
+/* ===== 参照情報をフッター内へ統合：最終調整 ===== */
+.footer {
+  flex: 0 0 auto !important;
+  min-height: 3.2vh !important;
+  height: 3.2vh !important;
+  box-sizing: border-box !important;
+  padding: .2vh 2.5vw !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 2vw !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  background: #07548c !important;
+  color: rgba(255,255,255,.9) !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  font-weight: 400 !important;
+}
+.footer-left,
+.footer-right {
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  gap: 1.5vw !important;
+}
+.footer-left {
+  flex: 1 1 auto !important;
+  justify-content: flex-start !important;
+}
+.footer-right {
+  flex: 0 0 auto !important;
+  justify-content: flex-end !important;
+}
+.footer-left span,
+.footer-right span {
+  display: inline-block !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  opacity: .9 !important;
+}
+.meta-card {
+  display: none !important;
+}
+@media (orientation: portrait) {
+  .footer {
+    min-height: 2.8vh !important;
+    height: 2.8vh !important;
+    padding: .15vh 3vw !important;
+  }
+  .footer-left,
+  .footer-right,
+  .footer-left span,
+  .footer-right span {
+    font-size: 9px !important;
+    line-height: 1 !important;
+  }
+}
