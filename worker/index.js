@@ -348,6 +348,7 @@ async function fetchChibaHtml(url) {
   return await res.text();
 }
 
+// FUNABASHI_WORKER_FIX_20260916
 function findFunabashiDetailLinks(html) {
   const found = {
     evacuation: null,
