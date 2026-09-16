@@ -1,29 +1,23 @@
-# Cloudflare Worker
+# Worker 本番安全改修版
 
-## Deploy
+既存の `/api/status` と `/api/health` を維持したまま、次の新しいエンドポイントを追加しています。
 
-```bash
-npx wrangler@latest login
-npx wrangler@latest deploy
-```
+`GET /api/chiba-disaster`
 
-公開後に表示される `workers.dev` URLを、GitHub Pages側の `docs/js/config.js` に設定します。
+この追加APIは千葉県防災ポータルから船橋市の最新詳細ページを取得し、
 
-## API
+- 避難情報（高齢者等避難／避難指示／緊急安全確保）
+- 避難所開設情報
 
-```text
-GET /api/status
-GET /api/health
-```
+を返します。
 
-## 対象
+重要:
+- 既存 `/api/status` のロジックは変更していません。
+- 新機能の取得失敗で既存の気象警報APIが停止しない設計です。
+- まず `/api/chiba-disaster` を単独で確認してから、サイネージ表示を統合してください。
+- 千葉県ポータルのHTML構造が変わった場合は、この追加解析部分を修正します。
 
-千葉県船橋市（1220400）
+デプロイ後:
+https://funabashi-disaster-signage.teclfilter.workers.dev/api/chiba-disaster
 
-## データ
-
-気象庁の現行警報・注意報JSONを利用します。
-URL:
-https://www.jma.go.jp/bosai/warning/data/r8/120000.json
-
-このWorkerは現在の市町村単位の警報・注意報を抽出し、サイネージ向けの共通JSONに変換します。
+Cloudflare Workers Free plan の現行制限では1リクエストあたり外部subrequestは50、日次Workerリクエストは100,000です。このAPIは通常1回の取得でポータル＋詳細2ページの最大3外部取得なので、サイネージの30秒ポーリングでもsubrequest上限内です。
