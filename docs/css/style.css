@@ -35,12 +35,12 @@ button, a { font:inherit; }
 .state-banner { margin:0 -4vw 2.7vh; padding:2vh 3vw; display:flex; align-items:center; justify-content:center; gap:1vw; color:#fff; font-size:clamp(30px,4.5vw,68px); font-weight:900; border-radius:23px 23px 10px 10px; }
 .state-icon { width:1.25em; height:1.25em; display:grid; place-items:center; background:rgba(255,255,255,.18); border-radius:50%; }
 .warning-name { font-size:clamp(32px,4.6vw,70px); font-weight:900; line-height:1.2; }
-.meta-card { background:#fff; border-radius:20px; padding:1.8vh 3vw; box-shadow:0 8px 22px rgba(0,30,60,.08); }
-.meta-row { display:flex; justify-content:space-between; gap:2vw; padding:1.1vh 0; border-bottom:1px solid #dce8f1; font-size:clamp(16px,1.55vw,25px); }
+.meta-card { background:transparent; border-radius:0; padding:.4vh 0; margin:0; box-shadow:none; }
+.meta-row { display:flex; justify-content:center; align-items:center; gap:1vw; padding:.15vh 0; border-bottom:0; font-size:11px; line-height:1.2; color:#6b7d8b; font-weight:400; }
 .meta-row:last-child { border-bottom:0; }
-.meta-label { color:var(--muted); font-weight:700; }
-.source-row { font-size:clamp(13px,1.2vw,20px); }
-.footer { flex:0 0 auto; min-height:6vh; padding:1.1vh 3vw; display:flex; justify-content:space-between; align-items:center; gap:2vw; color:#fff; background:#07548c; font-size:clamp(13px,1.2vw,20px); font-weight:700; }
+.meta-label { color:#718391; font-weight:400; }
+.source-row { font-size:10px; line-height:1.15; color:#7b8b96; opacity:.7; }
+.footer { flex:0 0 auto; min-height:3vh; height:3vh; padding:.3vh 3vw; display:flex; justify-content:space-between; align-items:center; gap:2vw; color:rgba(255,255,255,.75); background:#07548c; font-size:10px; line-height:1; font-weight:400; }
 
 body.normal .main-icon { background:var(--normal); }
 body.advisory .state-banner { background:var(--advisory); }
@@ -83,10 +83,10 @@ body.error .error-panel { border-top:12px solid var(--error); }
   .main-description { font-size:clamp(16px,4.1vw,28px); }
   .state-banner { margin:0 -5vw 2.3vh; font-size:clamp(26px,7vw,54px); padding:1.7vh 2vw; }
   .warning-name { font-size:clamp(27px,7vw,54px); }
-  .meta-card { padding:1.2vh 4vw; border-radius:16px; }
-  .meta-row { font-size:clamp(13px,3.4vw,20px); }
-  .source-row { font-size:clamp(11px,2.8vw,17px); }
-  .footer { min-height:5vh; padding:1vh 4vw; font-size:clamp(10px,2.6vw,16px); }
+  .meta-card { padding:.3vh 0; border-radius:0; }
+  .meta-row { font-size:10px; line-height:1.15; padding:.1vh 0; }
+  .source-row { font-size:9px; line-height:1.1; }
+  .footer { min-height:2.5vh; height:2.5vh; padding:.25vh 4vw; font-size:9px; line-height:1; }
   .test-panel { width:94vw; bottom:1vh; padding:1.2vh 2vw; }
   .test-buttons { grid-template-columns:repeat(2,1fr); gap:1.2vw; }
   .test-btn { min-height:5.8vh; font-size:clamp(11px,3vw,16px); }
