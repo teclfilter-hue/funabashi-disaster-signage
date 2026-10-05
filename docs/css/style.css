@@ -7,7 +7,7 @@
   --advisory: #d7a500;
   --warning: #e65b16;
   --danger: #6b2aa8;
-  --emergency: #d50072;
+  --emergency: #0c000c;
   --error: #444;
 }
 * { box-sizing: border-box; }
