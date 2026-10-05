@@ -146,9 +146,35 @@
     </section>`;
   }
 
+  const railwayLinks=[
+    {name:'JR総武線',company:'JR東日本',qr:'images/qr_jr_sobu.png',url:'https://traininfo.jreast.co.jp/train_info/kanto.aspx',note:'総武快速線・中央・総武各駅停車を含む関東エリアの公式運行情報'},
+    {name:'京成本線',company:'京成電鉄',qr:'images/qr_keisei.png',url:'https://www.keisei.co.jp/',note:'京成線の公式運行情報'},
+    {name:'東武アーバンパークライン',company:'東武鉄道',qr:'images/qr_tobu.png',url:'https://www.tobu.co.jp/service_status/',note:'東武アーバンパークラインの公式運行情報'},
+    {name:'東京メトロ東西線',company:'東京メトロ',qr:'images/qr_tokyo_metro_tozai.png',url:'https://www.tokyometro.jp/unkou/history/touzai.html',note:'東西線の公式運行情報'}
+  ];
+
+  function renderRailwayInfo(){
+    return `<section class="railway-card">
+      <div class="railway-header">
+        <div><span class="railway-icon">🚃</span><span class="railway-title">鉄道運行情報</span></div>
+        <div class="railway-lead">最新の運行情報は各鉄道会社の公式サイトでご確認ください。</div>
+      </div>
+      <div class="railway-list">${railwayLinks.map(r=>`
+        <div class="railway-row">
+          <div class="railway-route"><div class="railway-company">${esc(r.company)}</div><div class="railway-name">${esc(r.name)}</div></div>
+          <div class="railway-status"><span class="official-dot">●</span><span>公式運行情報を確認</span><small>${esc(r.note)}</small></div>
+          <a class="railway-qr" href="${esc(r.url)}" target="_blank" rel="noopener" aria-label="${esc(r.name)}の公式運行情報を確認">
+            <img src="${r.qr}" alt="${esc(r.name)} 公式運行情報QRコード">
+            <span>公式サイト</span>
+          </a>
+        </div>`).join('')}</div>
+      <div class="railway-note">※運行状況の最新情報は、QRコードから各鉄道会社の公式運行情報をご確認ください。</div>
+    </section>`;
+  }
+
   function renderChibaInfo(){
-    if(!chibaLatest || chibaLatest.ok===false)return '';
-    return `<div class="municipal-section">${renderEvacuation(chibaLatest.evacuation)}${renderShelters(chibaLatest.shelters)}</div>`;
+    if(!chibaLatest || chibaLatest.ok===false)return renderRailwayInfo();
+    return `<div class="municipal-section">${renderEvacuation(chibaLatest.evacuation)}${renderShelters(chibaLatest.shelters)}</div>${renderRailwayInfo()}`;
   }
 
   function renderMeta(data){
