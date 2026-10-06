@@ -1,69 +1,44 @@
-# Funabashi Disaster Signage Worker
+# 船橋市 防災サイネージ - 避難情報HTML技術検証追加版
 
-## 今回の改修
+既存本番を壊さないことを優先し、気象情報の `/api/status` は変更せず、千葉県防災ポータルの公開HTMLを使った避難情報取得を追加しています。
 
-既存のWorkerを拡張し、以下を実装しています。
+## 今回の改修内容
 
-### 1. 避難情報の複数地域対応
+1. 千葉県防災ポータルから船橋市の避難情報詳細ページを検出
+2. HTML本文から「高齢者等避難」「避難指示」「緊急安全確保」を抽出
+3. 発令／解除、対象地域、発令・更新日時を取得
+4. 複数対象地域がある場合は全件＋代表3地域を保持
+5. 新規 `GET /api/evacuation` を追加
+6. 既存 `GET /api/status` と `GET /api/chiba-disaster` の互換性を維持
+7. サイネージでは自治体の避難情報を気象警報より優先表示
+8. `?test=1&evacuation=3/4/5` のテスト表示を追加
+9. 正式APIが確認できた場合に取得部分だけ差し替えられる構成
 
-千葉県防災ポータルの避難情報詳細ページに複数の対象地域が掲載されている場合、全発令地域を解析します。
+## データ元
 
-`/api/chiba-disaster` の `evacuation` に以下を追加しています。
+今回の取得方式は**千葉県防災ポータルの公開HTMLを利用した技術検証**です。
 
-- `totalAreas` : 現在発令中の対象地域数
-- `areas` : 現在発令中の全対象地域
-- `representativeAreas` : サイネージ表示用の代表3地域
+千葉県の公式説明では、市町村から県の防災情報システムへ報告された避難情報・避難所開設情報が千葉県防災ポータルで公開されるとされています。
 
-例:
+第三者向けの正式なJSON/API仕様が確認できた場合は、Workerの取得処理だけを切り替える方針です。
 
-```json
-{
-  "active": true,
-  "level": 4,
-  "status": "発令",
-  "title": "避難指示",
-  "totalAreas": 5,
-  "representativeAreas": [
-    { "name": "○○地区", "type": "避難指示", "level": 4, "updatedAt": "2026/09/16 10:00" },
-    { "name": "△△町", "type": "避難指示", "level": 4, "updatedAt": "2026/09/16 09:55" },
-    { "name": "□□地区", "type": "高齢者等避難", "level": 3, "updatedAt": "2026/09/16 09:50" }
-  ]
-}
+## デプロイ
+
+Cloudflare Workers Builds の既存設定をそのまま利用できます。
+
+- Root directory: `/worker`
+- Build command: なし
+- Deploy command: `npx wrangler deploy`
+- Production branch: `main`
+
+## テストURL
+
+GitHub PagesのURLに以下を付けます。
+
+```text
+?test=1&evacuation=3   # 警戒レベル3 高齢者等避難
+?test=1&evacuation=4   # 警戒レベル4 避難指示
+?test=1&evacuation=5   # 警戒レベル5 緊急安全確保
 ```
 
-画面側では `representativeAreas` の2～3件だけを表示し、`sourceUrl` をQRのリンク先として利用できます。
-
-### 2. 避難所の代表表示対応
-
-`/api/chiba-disaster` の `shelters` に `representativeShelters` を追加しています。開設中施設のうち最大3施設を返します。
-
-- `count` : 開設中施設数
-- `shelters` : 開設中の全施設
-- `representativeShelters` : サイネージ表示用の代表3施設
-
-### 3. 気象情報の警戒レベル判定を新体系に合わせて修正
-
-`/api/status` は既存どおり気象庁データを取得しますが、警戒レベルの判定を以下に整理しています。
-
-- 特別警報 → レベル5
-- 危険警報 → レベル4
-- 警報 → レベル3
-- 注意報 → レベル2
-
-気象庁から取得した情報名をそのまま優先するため、固定の「大雨警報」「雷注意報」画面を作る方式ではありません。
-
-## 外部費用について
-
-今回の改修では、新しい有料API、外部データサービス、サーバー等は追加していません。
-既存の以下の情報源を引き続き利用します。
-
-- 気象庁 警報・注意報データ
-- 千葉県防災ポータルサイト
-
-## API
-
-- `GET /api/status`
-- `GET /api/chiba-disaster`
-- `GET /api/health`
-
-既存のエンドポイント名は変更していません。
+既存の気象テスト `?test=1&level=2/3/4/5` は変更していません。
