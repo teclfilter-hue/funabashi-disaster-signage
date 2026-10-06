@@ -32,6 +32,23 @@ export default {
       return json(data, data.ok ? 200 : 502);
     }
 
+    // 新規追加：避難情報だけを返す専用エンドポイント。
+    // 既存 /api/status と /api/chiba-disaster の仕様は変更しない。
+    if (url.pathname === "/api/evacuation") {
+      const data = await getChibaDisaster();
+      return json({
+        ok: data.ok,
+        dataStatus: data.ok ? "ok" : "error",
+        areaName: data.areaName,
+        areaCode: data.areaCode,
+        checkedAt: data.checkedAt,
+        source: data.source,
+        sourceUrl: data.sourceUrl,
+        evacuation: data.evacuation,
+        error: data.error || undefined
+      }, data.ok ? 200 : 502);
+    }
+
     if (url.pathname === "/api/health") {
       return json({
         ok: true,
