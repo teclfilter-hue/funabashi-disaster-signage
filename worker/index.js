@@ -120,7 +120,6 @@ function extractWarnings(raw) {
     const warning = report?.warning;
     if (!warning) continue;
 
-    // 新体系: class20Items に市町村ごとの現在の種類が入る。
     const items = Array.isArray(warning.class20Items)
       ? warning.class20Items
       : [];
@@ -156,7 +155,6 @@ function extractWarnings(raw) {
       }
     }
 
-    // 旧構造にも対応しておく。
     const oldAreaTypes = report?.timeSeries?.[0]?.areaTypes;
     if (Array.isArray(oldAreaTypes)) {
       for (const areaType of oldAreaTypes) {
@@ -278,7 +276,7 @@ let chibaMemoryCacheAt = 0;
 const CHIBA_CACHE_SECONDS = 60;
 
 async function getChibaDisaster(searchParams = new URLSearchParams()) {
-  // test=1 の確認（テスト時はキャッシュをスキップしてモック生成）
+  // test=1 の確認（文字列/数値に対応したテストデータの生成）
   const isTest = searchParams.get("test") === "1";
   const testLevel = searchParams.get("evacuation");
 
@@ -349,14 +347,19 @@ async function getChibaDisaster(searchParams = new URLSearchParams()) {
   }
 }
 
-// テスト用データ生成用関数
+// テスト用データ生成用関数（レベルに応じた判定を明確化）
 function generateMockDisasterData(testLevelParam) {
-  const level = Number(testLevelParam) || 3;
+  const parsedLevel = parseInt(testLevelParam, 10);
+  const level = !isNaN(parsedLevel) && parsedLevel >= 1 ? parsedLevel : 3;
+
   const levelNames = {
+    1: "早期注意情報",
+    2: "大雨・洪水注意報",
     3: "高齢者等避難",
     4: "避難指示",
     5: "緊急安全確保"
   };
+
   const titleName = levelNames[level] || `警戒レベル${level}情報`;
   const nowIso = new Date().toISOString().replace("T", " ").substring(0, 16);
 
