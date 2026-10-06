@@ -28,13 +28,14 @@ export default {
     }
 
     if (url.pathname === "/api/chiba-disaster") {
-      const data = await getChibaDisaster(url.searchParams);
+      const data = await getChibaDisaster();
       return json(data, data.ok ? 200 : 502);
     }
 
-    // 避難情報だけを返す専用エンドポイント（テストクエリパラメーター対応）
+    // 新規追加：避難情報だけを返す専用エンドポイント。
+    // 既存 /api/status と /api/chiba-disaster の仕様は変更しない。
     if (url.pathname === "/api/evacuation") {
-      const data = await getChibaDisaster(url.searchParams);
+      const data = await getChibaDisaster();
       return json({
         ok: data.ok,
         dataStatus: data.ok ? "ok" : "error",
@@ -120,6 +121,7 @@ function extractWarnings(raw) {
     const warning = report?.warning;
     if (!warning) continue;
 
+    // 新体系: class20Items に市町村ごとの現在の種類が入る。
     const items = Array.isArray(warning.class20Items)
       ? warning.class20Items
       : [];
@@ -155,6 +157,7 @@ function extractWarnings(raw) {
       }
     }
 
+    // 旧構造にも対応しておく。
     const oldAreaTypes = report?.timeSeries?.[0]?.areaTypes;
     if (Array.isArray(oldAreaTypes)) {
       for (const areaType of oldAreaTypes) {
@@ -266,7 +269,8 @@ function json(data, status=200) {
 
 
 // ============================================================
-// 船橋市「避難情報＋避難所情報」機能
+// 船橋市「避難情報＋避難所情報」追加機能
+// 既存 /api/status は変更せず、新しい /api/chiba-disaster として提供。
 // ============================================================
 
 const CHIBA_PORTAL_URL = "https://www.bousai.pref.chiba.lg.jp/";
@@ -275,15 +279,7 @@ let chibaMemoryCache = null;
 let chibaMemoryCacheAt = 0;
 const CHIBA_CACHE_SECONDS = 60;
 
-async function getChibaDisaster(searchParams = new URLSearchParams()) {
-  // test=1 の確認（文字列/数値に対応したテストデータの生成）
-  const isTest = searchParams.get("test") === "1";
-  const testLevel = searchParams.get("evacuation");
-
-  if (isTest) {
-    return generateMockDisasterData(testLevel);
-  }
-
+async function getChibaDisaster() {
   const now = Date.now();
   if (chibaMemoryCache && now - chibaMemoryCacheAt < CHIBA_CACHE_SECONDS * 1000) {
     return chibaMemoryCache;
@@ -292,6 +288,8 @@ async function getChibaDisaster(searchParams = new URLSearchParams()) {
   const checkedAt = new Date().toISOString();
 
   try {
+    // ① 千葉県防災ポータルから、船橋市の最新「避難情報」「避難所情報」
+    //    詳細ページのURLを探す。
     const portalHtml = await fetchChibaHtml(CHIBA_PORTAL_URL);
     const links = findFunabashiDetailLinks(portalHtml);
 
@@ -318,6 +316,7 @@ async function getChibaDisaster(searchParams = new URLSearchParams()) {
     chibaMemoryCacheAt = now;
     return result;
   } catch (error) {
+    // この追加機能の失敗で既存 /api/status を壊さない。
     return {
       ok: false,
       areaName: `${CONFIG.prefectureName}${CONFIG.cityName}`,
@@ -347,68 +346,6 @@ async function getChibaDisaster(searchParams = new URLSearchParams()) {
   }
 }
 
-// テスト用データ生成用関数（レベルに応じた判定を明確化）
-function generateMockDisasterData(testLevelParam) {
-  const parsedLevel = parseInt(testLevelParam, 10);
-  const level = !isNaN(parsedLevel) && parsedLevel >= 1 ? parsedLevel : 3;
-
-  const levelNames = {
-    1: "早期注意情報",
-    2: "大雨・洪水注意報",
-    3: "高齢者等避難",
-    4: "避難指示",
-    5: "緊急安全確保"
-  };
-
-  const titleName = levelNames[level] || `警戒レベル${level}情報`;
-  const nowIso = new Date().toISOString().replace("T", " ").substring(0, 16);
-
-  return {
-    ok: true,
-    areaName: `${CONFIG.prefectureName}${CONFIG.cityName}`,
-    areaCode: CONFIG.cityCode,
-    checkedAt: new Date().toISOString(),
-    source: "千葉県防災ポータルサイト（テストデータ）",
-    sourceUrl: CHIBA_PORTAL_URL,
-    evacuation: {
-      active: true,
-      level: level,
-      status: "発令",
-      title: titleName,
-      areaName: CONFIG.cityName,
-      message: `【テスト表示】${CONFIG.cityName}全域：${titleName} 警戒レベル${level}が発令されています。`,
-      updatedAt: nowIso,
-      sourceUrl: CHIBA_PORTAL_URL,
-      totalAreas: 1,
-      areas: [
-        {
-          name: `${CONFIG.cityName}全域`,
-          type: titleName,
-          level: level,
-          status: "発令",
-          updatedAt: nowIso
-        }
-      ],
-      representativeAreas: [
-        {
-          name: `${CONFIG.cityName}全域`,
-          type: titleName,
-          level: level,
-          updatedAt: nowIso
-        }
-      ]
-    },
-    shelters: {
-      active: false,
-      count: 0,
-      shelters: [],
-      representativeShelters: [],
-      message: "現在、船橋市で開設中の避難所はありません。",
-      sourceUrl: CHIBA_PORTAL_URL
-    }
-  };
-}
-
 async function fetchChibaHtml(url) {
   if (!url) return "";
 
@@ -435,6 +372,8 @@ function findFunabashiDetailLinks(html) {
     shelter: null
   };
 
+  // PUB_VF_Detail_Hinan のリンクだけを文字列処理で抽出する。
+  // 正規表現で HTML 全体を解析せず、エスケープ由来のビルドエラーを避ける。
   const source = String(html || "");
   const marker = "PUB_VF_Detail_Hinan";
   let cursor = 0;
@@ -499,6 +438,8 @@ function parseEvacuationPage(html, sourceUrl) {
 
   if (!text) return result;
 
+  // 千葉県ポータルの詳細ページに記載される避難情報イベントを取得する。
+  // 1ページ内に複数地域・複数レベルがあるケースを前提に、全イベントを保持する。
   const eventRegex =
     /(市内全域|市内対象地域|[^\s：:]{1,60})\s*[：:]\s*(緊急安全確保|避難指示|高齢者等避難)\s+警戒レベル\s*([３４５]|[345])\s*(発令|解除)\s*\(\s*(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2})\s*\)/g;
 
@@ -518,6 +459,7 @@ function parseEvacuationPage(html, sourceUrl) {
   }
 
   if (!events.length) {
+    // 日付表記や空白差に耐える簡易検索。
     const simple = text.match(
       /(緊急安全確保|避難指示|高齢者等避難)[^。]{0,100}(発令|解除)/
     );
@@ -532,6 +474,8 @@ function parseEvacuationPage(html, sourceUrl) {
     }
   }
 
+  // 地域ごとの最新イベントを残す。
+  // 同一地域で「発令→解除」が並ぶ場合は、時刻が新しい方を採用する。
   const latestByArea = new Map();
   for (const event of events) {
     const key = event.area;
@@ -611,6 +555,8 @@ function parseShelterPage(html, sourceUrl) {
 
   if (!text) return result;
 
+  // 千葉県ポータルの詳細ページでは、同一ページに複数施設の
+  // 「開設」「閉鎖」イベントが列挙されるため、施設単位で最新状態を確定する。
   const re =
     /([^：:]{1,50})\s*[：:]\s*避難所\s+(開設|閉鎖)\s*\(\s*(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2})\s*\)/g;
 
@@ -626,6 +572,7 @@ function parseShelterPage(html, sourceUrl) {
     events.push({ name, status, updatedAt });
   }
 
+  // 施設ごとに最新イベントを残す。
   const latestByName = new Map();
   for (const event of events) {
     const old = latestByName.get(event.name);
