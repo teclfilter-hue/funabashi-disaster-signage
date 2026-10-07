@@ -166,6 +166,30 @@
     return `<div class="municipal-section">${evacuationActive?'':renderEvacuation(chibaLatest.evacuation)}${renderShelters(chibaLatest.shelters)}</div>`;
   }
 
+  // 近隣鉄道の公式運行情報へのQR誘導（運行情報そのものは各社公式ページで確認）
+  const railwayLinks = [
+    {name:'JR東日本', short:'JR東日本', url:'https://traininfo.jreast.co.jp/train_info/', qr:'images/qr_jreast.png'},
+    {name:'京成電鉄', short:'京成電鉄', url:'https://www.keisei.co.jp/', qr:'images/qr_keisei.png'},
+    {name:'東武鉄道', short:'東武鉄道', url:'https://www.tobu.co.jp/railway/', qr:'images/qr_tobu.png'},
+    {name:'東京メトロ', short:'東京メトロ', url:'https://www.tokyometro.jp/index.html', qr:'images/qr_tokyometro.png'}
+  ];
+
+  function renderRailway(){
+    return `<section class="railway-section">
+      <div class="railway-header">
+        <div class="railway-title">鉄道運行情報</div>
+        <div class="railway-note">各社公式ページで最新の運行状況を確認</div>
+      </div>
+      <div class="railway-grid">
+        ${railwayLinks.map(r=>`<a class="railway-card" href="${esc(r.url)}" target="_blank" rel="noopener" aria-label="${esc(r.name)}の公式運行情報を確認">
+          <div class="railway-card-name">${esc(r.short)}</div>
+          <img src="${esc(r.qr)}" alt="${esc(r.name)} 公式運行情報QRコード">
+          <div class="railway-card-caption">公式運行情報を確認</div>
+        </a>`).join('')}
+      </div>
+    </section>`;
+  }
+
   function renderMeta(data){
     return `<section class="meta-card"><div class="meta-row"><span class="meta-label">気象情報</span><span>気象庁 警報・注意報データ</span></div><div class="meta-row"><span class="meta-label">自治体情報</span><span>千葉県防災ポータルサイト</span></div><div class="meta-row"><span class="meta-label">対象地域</span><span>千葉県船橋市</span></div>${data?.checkedAt?`<div class="meta-row source-row"><span class="meta-label">最終取得</span><span>${formatDate(data.checkedAt)}</span></div>`:''}</section>`;
   }
@@ -176,7 +200,7 @@
     const viewState=(data && data.level)?{...state,weather:data,weatherNames:Array.isArray(data.weatherNames)?data.weatherNames:[]}:state;
     document.body.className=evacuationActive ? (Number(evac.level)>=5?'emergency':Number(evac.level)===4?'danger':'warning') : viewState.cls;
     const mainHtml=evacuationActive ? renderEvacuationMain(evac) : (viewState.level===0?renderNormal(viewState):renderAlert(viewState));
-    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content">${mainHtml}${renderChibaInfo()}${renderMeta(data)}</div></div>`;
+    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content">${mainHtml}${renderChibaInfo()}${renderRailway()}${renderMeta(data)}</div></div>`;
   }
 
   function renderError(message){
@@ -223,10 +247,7 @@
 
   function demoChiba(){
     const shelterDemo=params.get('shelter')==='1';
-    // テストURLは evacuation=3 / 4 / 5 のいずれかを指定する。
-    // 不正値・未指定の場合は「発令なし」とする。
-    const evacParam=(params.get('evacuation')||'').trim();
-    const evac=['3','4','5'].includes(evacParam) ? Number(evacParam) : 0;
+    const evac=Number(params.get('evacuation')||0);
     const evacuationMap={
       3:{active:true,level:3,title:'高齢者等避難',message:'警戒レベル3　高齢者等避難が発令されています。危険な場所にいる高齢者等は避難を開始してください。',updatedAt:new Date().toISOString(),representativeAreas:[{name:'船橋市内 対象地域'}]},
       4:{active:true,level:4,title:'避難指示',message:'警戒レベル4　避難指示が発令されています。危険な場所から全員避難してください。',updatedAt:new Date().toISOString(),representativeAreas:[{name:'船橋市内 対象地域'}]},

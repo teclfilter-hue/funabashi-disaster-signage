@@ -107,3 +107,84 @@ body.emergency .alert-panel { border-color: var(--emergency); }
   .evacuation-main-panel .warning-name { font-size: clamp(30px,4.8vw,50px); }
   .evacuation-main-panel .level-caption { font-size: clamp(17px,2.1vw,25px); }
 }
+
+/* ===== 鉄道公式運行情報QR ===== */
+.railway-section {
+  width: 100%;
+  margin-top: 1vh;
+  padding: 1.2vh 1.5vw 1.3vh;
+  box-sizing: border-box;
+  border: 1px solid #d7e1e8;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+.railway-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1vw;
+  margin-bottom: .8vh;
+}
+.railway-title {
+  font-size: clamp(18px, 1.7vw, 28px);
+  font-weight: 900;
+  color: #09233d;
+}
+.railway-note {
+  font-size: clamp(10px, .95vw, 15px);
+  color: #607487;
+  font-weight: 700;
+}
+.railway-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .8vw;
+}
+.railway-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: .65vw;
+  align-items: center;
+  min-width: 0;
+  padding: .7vh .7vw;
+  border: 1px solid #d7e1e8;
+  border-radius: 12px;
+  background: #fff;
+  color: #09233d;
+  text-decoration: none;
+}
+.railway-card img {
+  grid-row: 1 / span 2;
+  width: clamp(48px, 5vw, 72px);
+  height: clamp(48px, 5vw, 72px);
+  object-fit: contain;
+  background: #fff;
+}
+.railway-card-name {
+  font-size: clamp(14px, 1.25vw, 21px);
+  font-weight: 900;
+  line-height: 1.15;
+}
+.railway-card-caption {
+  margin-top: .25vh;
+  font-size: clamp(9px, .85vw, 13px);
+  color: #607487;
+  line-height: 1.2;
+}
+.railway-card:hover,
+.railway-card:focus-visible {
+  border-color: #6d8ba1;
+  outline: none;
+}
+
+@media (orientation: portrait) and (min-width: 700px) {
+  .railway-section { margin-top: .8vh; padding: 1vh 2vw; }
+  .railway-header { display: block; }
+  .railway-note { margin-top: .2vh; }
+  .railway-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1vw; }
+  .railway-card { padding: .8vh 1vw; }
+  .railway-card img { width: clamp(58px, 11vw, 90px); height: clamp(58px, 11vw, 90px); }
+  .railway-card-name { font-size: clamp(16px, 2.3vw, 25px); }
+  .railway-card-caption { font-size: clamp(10px, 1.35vw, 15px); }
+}
