@@ -4,10 +4,10 @@
   --text: #09233d;
   --muted: #557087;
   --normal: #0b5c9e;
-  --advisory: #f2e700;
-  --warning: #ff2800;
-  --danger: #aa00aa;
-  --emergency: #0c000c;
+  --advisory: #F2E700;
+  --warning: #FF2800;
+  --danger: #AA00AA;
+  --emergency: #0C000C;
   --error: #444;
 }
 * { box-sizing: border-box; }

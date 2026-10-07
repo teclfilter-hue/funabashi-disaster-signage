@@ -188,3 +188,377 @@ body.emergency .alert-panel { border-color: var(--emergency); }
   .railway-card-name { font-size: clamp(16px, 2.3vw, 25px); }
   .railway-card-caption { font-size: clamp(10px, 1.35vw, 15px); }
 }
+
+/* =========================================================
+   43インチ縦型・1画面収容レスポンシブ設計
+   情報量に応じて段階的にコンパクト化し、スクロールを発生させない
+   ========================================================= */
+:root {
+  --footer-h: 38px;
+  --content-gap: 1.1vh;
+}
+
+html, body, #app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden !important;
+}
+
+.screen-shell {
+  height: calc(100% - var(--footer-h)) !important;
+  min-height: calc(100% - var(--footer-h)) !important;
+  overflow: hidden !important;
+}
+
+.screen-content {
+  width: min(94vw, 1080px) !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  justify-content: flex-start !important;
+  gap: var(--content-gap) !important;
+  padding: 1.2vh 0 .8vh !important;
+}
+
+/* 各ブロックは縮小可能にする */
+.screen-content > * {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-width: 100%;
+}
+
+/* メイン警報・避難情報 */
+.main-message {
+  padding: 1.8vh 3vw !important;
+  border-radius: 20px !important;
+}
+
+.main-icon {
+  width: clamp(54px, 8vw, 100px) !important;
+  height: clamp(54px, 8vw, 100px) !important;
+  font-size: clamp(32px, 5vw, 60px) !important;
+  margin-bottom: .7vh !important;
+}
+
+.main-title {
+  font-size: clamp(25px, 3.7vw, 48px) !important;
+  line-height: 1.15 !important;
+}
+
+.main-description {
+  margin-top: .8vh !important;
+  font-size: clamp(15px, 1.8vw, 25px) !important;
+  line-height: 1.35 !important;
+}
+
+.alert-panel,
+.evacuation-main-panel {
+  padding-bottom: 1.3vh !important;
+}
+
+.state-banner,
+.evacuation-main-banner {
+  margin-bottom: 1vh !important;
+  padding: 1.0vh 2vw !important;
+  font-size: clamp(23px, 3.6vw, 46px) !important;
+  border-radius: 17px 17px 8px 8px !important;
+}
+
+.warning-name {
+  font-size: clamp(26px, 3.8vw, 50px) !important;
+  line-height: 1.12 !important;
+}
+
+.level-caption {
+  margin-top: .5vh !important;
+  font-size: clamp(16px, 1.8vw, 25px) !important;
+  line-height: 1.3 !important;
+}
+
+.weather-primary .main-description {
+  margin-top: .6vh !important;
+}
+
+.weather-list,
+.evacuation-targets {
+  margin-top: .8vh !important;
+  padding: .7vh 1.5vw !important;
+  border-radius: 11px !important;
+}
+
+.weather-list-title {
+  font-size: clamp(13px, 1.25vw, 19px) !important;
+  margin-bottom: .2vh !important;
+}
+
+.weather-list-row {
+  padding: .18vh 0 !important;
+  font-size: clamp(14px, 1.55vw, 22px) !important;
+  line-height: 1.15 !important;
+}
+
+.weather-list-more {
+  margin-top: .2vh;
+  font-size: clamp(9px, .9vw, 13px);
+  color: #557087;
+  font-weight: 700;
+  text-align: right;
+}
+
+.info-updated {
+  margin-top: .45vh !important;
+  font-size: clamp(9px, .85vw, 13px) !important;
+  line-height: 1.1 !important;
+}
+
+.info-source {
+  padding-bottom: .45vh !important;
+  font-size: 9px !important;
+  line-height: 1.05 !important;
+}
+
+/* 自治体情報 */
+.municipal-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--content-gap);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.info-card {
+  border-radius: 15px !important;
+  box-shadow: 0 5px 14px rgba(0,30,60,.08) !important;
+}
+
+.info-card-header {
+  padding: .65vh 1.5vw !important;
+}
+
+.info-card-title {
+  font-size: clamp(17px, 1.8vw, 27px) !important;
+}
+
+.info-card-badge {
+  font-size: clamp(12px, 1.35vw, 19px) !important;
+  padding: .3vh .8vw !important;
+}
+
+.info-card-body {
+  padding: .7vh 1.5vw !important;
+}
+
+.compact-status {
+  padding: .65vh 1.5vw !important;
+}
+
+.compact-title {
+  font-size: clamp(16px, 1.65vw, 24px) !important;
+}
+
+.compact-value {
+  font-size: clamp(12px, 1.3vw, 18px) !important;
+}
+
+.representative-label {
+  font-size: clamp(11px, 1.1vw, 16px) !important;
+  margin-bottom: .2vh !important;
+}
+
+.shelter-body {
+  gap: 1vw !important;
+}
+
+.shelter-row {
+  padding: .25vh 0 !important;
+}
+
+.shelter-name {
+  font-size: clamp(14px, 1.55vw, 21px) !important;
+  line-height: 1.15 !important;
+}
+
+.shelter-more {
+  margin-top: .25vh !important;
+  font-size: clamp(10px, 1vw, 14px) !important;
+}
+
+.shelter-qr {
+  width: clamp(70px, 9vw, 105px) !important;
+}
+
+.shelter-qr img {
+  border-width: 4px !important;
+}
+
+.shelter-qr span {
+  margin-top: .25vh !important;
+  font-size: clamp(9px, .9vw, 13px) !important;
+}
+
+.shelter-qr small {
+  margin-top: 0 !important;
+  font-size: clamp(8px, .75vw, 11px) !important;
+}
+
+/* 鉄道QR */
+.railway-section {
+  margin-top: 0 !important;
+  padding: .65vh 1vw .7vh !important;
+  border-radius: 12px !important;
+  flex-shrink: 1 !important;
+}
+
+.railway-header {
+  margin-bottom: .35vh !important;
+}
+
+.railway-title {
+  font-size: clamp(15px, 1.45vw, 22px) !important;
+}
+
+.railway-note {
+  font-size: clamp(8px, .75vw, 11px) !important;
+}
+
+.railway-grid {
+  gap: .5vw !important;
+}
+
+.railway-card {
+  padding: .45vh .5vw !important;
+  border-radius: 9px !important;
+}
+
+.railway-card img {
+  width: clamp(40px, 5.2vw, 62px) !important;
+  height: clamp(40px, 5.2vw, 62px) !important;
+}
+
+.railway-card-name {
+  font-size: clamp(11px, 1.05vw, 16px) !important;
+}
+
+.railway-card-caption {
+  margin-top: .1vh !important;
+  font-size: clamp(8px, .7vw, 11px) !important;
+}
+
+/* =========================================================
+   JSが情報量を判定した場合の段階的コンパクトモード
+   ========================================================= */
+.screen-content.fit-compact-1 {
+  --content-gap: .8vh;
+}
+.screen-content.fit-compact-1 .main-message {
+  padding-top: 1.25vh !important;
+  padding-bottom: .9vh !important;
+}
+.screen-content.fit-compact-1 .main-icon { width: 54px !important; height: 54px !important; font-size: 32px !important; }
+.screen-content.fit-compact-1 .weather-list-row { font-size: 13px !important; }
+.screen-content.fit-compact-1 .info-card-body { padding-top: .45vh !important; padding-bottom: .45vh !important; }
+.screen-content.fit-compact-1 .shelter-qr { width: 78px !important; }
+.screen-content.fit-compact-1 .railway-card img { width: 44px !important; height: 44px !important; }
+
+.screen-content.fit-compact-2 {
+  --content-gap: .55vh;
+  padding-top: .65vh !important;
+  padding-bottom: .45vh !important;
+}
+.screen-content.fit-compact-2 .main-message { padding: .8vh 2vw !important; }
+.screen-content.fit-compact-2 .state-banner,
+.screen-content.fit-compact-2 .evacuation-main-banner { padding: .65vh 1.5vw !important; margin-bottom: .6vh !important; font-size: 22px !important; }
+.screen-content.fit-compact-2 .warning-name { font-size: 28px !important; }
+.screen-content.fit-compact-2 .main-description { font-size: 14px !important; line-height: 1.25 !important; }
+.screen-content.fit-compact-2 .weather-list,
+.screen-content.fit-compact-2 .evacuation-targets { padding: .45vh 1vw !important; margin-top: .45vh !important; }
+.screen-content.fit-compact-2 .info-card-header { padding: .45vh 1vw !important; }
+.screen-content.fit-compact-2 .info-card-body { padding: .45vh 1vw !important; }
+.screen-content.fit-compact-2 .shelter-name { font-size: 14px !important; }
+.screen-content.fit-compact-2 .shelter-qr { width: 68px !important; }
+.screen-content.fit-compact-2 .railway-section { padding: .4vh .6vw !important; }
+.screen-content.fit-compact-2 .railway-card { padding: .3vh .3vw !important; }
+.screen-content.fit-compact-2 .railway-card img { width: 38px !important; height: 38px !important; }
+
+.screen-content.fit-compact-3 {
+  --content-gap: .3vh;
+  padding-top: .3vh !important;
+  padding-bottom: .2vh !important;
+}
+.screen-content.fit-compact-3 .main-message { padding: .55vh 1.5vw !important; border-radius: 12px !important; }
+.screen-content.fit-compact-3 .main-icon { width: 42px !important; height: 42px !important; font-size: 25px !important; }
+.screen-content.fit-compact-3 .main-title { font-size: 23px !important; }
+.screen-content.fit-compact-3 .state-banner,
+.screen-content.fit-compact-3 .evacuation-main-banner { padding: .45vh 1vw !important; margin-bottom: .35vh !important; font-size: 19px !important; border-radius: 9px !important; }
+.screen-content.fit-compact-3 .warning-name { font-size: 24px !important; }
+.screen-content.fit-compact-3 .level-caption { font-size: 13px !important; }
+.screen-content.fit-compact-3 .main-description { font-size: 12px !important; line-height: 1.18 !important; }
+.screen-content.fit-compact-3 .weather-list-row { font-size: 11px !important; padding: .08vh 0 !important; }
+.screen-content.fit-compact-3 .info-card-header { padding: .3vh .7vw !important; }
+.screen-content.fit-compact-3 .info-card-title { font-size: 15px !important; }
+.screen-content.fit-compact-3 .info-card-badge { font-size: 10px !important; padding: .15vh .5vw !important; }
+.screen-content.fit-compact-3 .info-card-body { padding: .3vh .7vw !important; }
+.screen-content.fit-compact-3 .representative-label { font-size: 9px !important; }
+.screen-content.fit-compact-3 .shelter-name { font-size: 12px !important; }
+.screen-content.fit-compact-3 .shelter-qr { width: 54px !important; }
+.screen-content.fit-compact-3 .shelter-qr span { font-size: 8px !important; }
+.screen-content.fit-compact-3 .railway-title { font-size: 13px !important; }
+.screen-content.fit-compact-3 .railway-note { display: none; }
+.screen-content.fit-compact-3 .railway-card img { width: 32px !important; height: 32px !important; }
+.screen-content.fit-compact-3 .railway-card-name { font-size: 9px !important; }
+.screen-content.fit-compact-3 .railway-card-caption { display: none; }
+
+/* 最終段階：重要情報を残して補助説明だけを圧縮 */
+.screen-content.fit-critical {
+  --content-gap: .15vh;
+}
+.screen-content.fit-critical .main-description,
+.screen-content.fit-critical .info-source,
+.screen-content.fit-critical .info-updated,
+.screen-content.fit-critical .railway-note,
+.screen-content.fit-critical .railway-card-caption,
+.screen-content.fit-critical .shelter-qr small,
+.screen-content.fit-critical .shelter-more {
+  display: none !important;
+}
+.screen-content.fit-critical .main-message { padding: .35vh 1vw !important; }
+.screen-content.fit-critical .warning-name { font-size: 21px !important; }
+.screen-content.fit-critical .level-caption { font-size: 12px !important; }
+.screen-content.fit-critical .weather-list { margin-top: .2vh !important; padding: .25vh .7vw !important; }
+.screen-content.fit-critical .weather-list-row { font-size: 10px !important; }
+.screen-content.fit-critical .info-card-header,
+.screen-content.fit-critical .info-card-body { padding-top: .2vh !important; padding-bottom: .2vh !important; }
+.screen-content.fit-critical .shelter-name { font-size: 10px !important; }
+.screen-content.fit-critical .shelter-qr { width: 45px !important; }
+.screen-content.fit-critical .railway-card { padding: .15vh .2vw !important; }
+.screen-content.fit-critical .railway-card img { width: 27px !important; height: 27px !important; }
+.screen-content.fit-critical .railway-card-name { font-size: 8px !important; }
+
+/* 43インチ縦型を想定した標準値 */
+@media (orientation: portrait) and (min-width: 700px) {
+  :root { --footer-h: 34px; }
+  .screen-content {
+    width: min(90vw, 1080px) !important;
+    padding-top: 1vh !important;
+    padding-bottom: .5vh !important;
+  }
+  .topbar {
+    min-height: 9vh !important;
+    padding: 1.2vh 4vw !important;
+  }
+  .brand-title { font-size: clamp(24px, 4vw, 44px) !important; }
+  .brand-area { font-size: clamp(14px, 1.8vw, 21px) !important; }
+  .clock { font-size: clamp(13px, 1.4vw, 22px) !important; }
+  .connection { font-size: 10px !important; }
+  .footer { height: var(--footer-h) !important; min-height: var(--footer-h) !important; }
+}
+
+@media (max-height: 900px) {
+  .screen-content { --content-gap: .45vh; }
+  .topbar { min-height: 8vh !important; }
+}
+
+/* 最終圧縮時：発令なしの補助カードは省略し、発令中の情報を優先 */
+.screen-content.fit-hide-clear .municipal-section .compact-status:not(.shelter-card) {
+  display: none !important;
+}
