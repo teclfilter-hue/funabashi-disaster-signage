@@ -101,6 +101,7 @@
   function renderAlert(s){
     const w=s.weather||{};
     const names=Array.isArray(s.weatherNames)?s.weatherNames:[];
+    const total=Math.max(names.length, Number(s.weatherCount||0));
     return `<section class="main-message alert-panel">
       <div class="state-banner"><span class="state-icon">${s.icon}</span><span>${esc(w.label||s.label)} 発表中</span></div>
       <div class="weather-primary">
@@ -108,7 +109,7 @@
         <div class="level-caption">レベル${w.level||s.level}　${esc(w.label||s.label)}</div>
         <div class="main-description">${esc(w.message||s.message)}</div>
       </div>
-      ${names.length>1?`<div class="weather-list"><div class="weather-list-title">発表中の気象情報</div>${names.map((n,i)=>`<div class="weather-list-row"><span>${i===0?'●':'○'}</span><strong>${esc(n)}</strong></div>`).join('')}</div>`:''}
+      ${names.length>1?`<div class="weather-list"><div class="weather-list-title">発表中の気象情報</div>${names.map((n,i)=>`<div class="weather-list-row"><span>${i===0?'●':'○'}</span><strong>${esc(n)}</strong></div>`).join('')}${total>names.length?`<div class="weather-list-more">ほか${total-names.length}件の気象情報があります</div>`:''}</div>`:''}
       ${w.updatedAt?`<div class="info-updated">発表・更新日時：${formatDate(w.updatedAt)}</div>`:''}
     </section>`;
   }
@@ -162,8 +163,7 @@
 
   function renderChibaInfo(){
     if(!chibaLatest || chibaLatest.ok===false)return '';
-    const evacuationActive=!!chibaLatest?.evacuation?.active;
-    return `<div class="municipal-section">${evacuationActive?'':renderEvacuation(chibaLatest.evacuation)}${renderShelters(chibaLatest.shelters)}</div>`;
+    return `<div class="municipal-section">${renderEvacuation(chibaLatest.evacuation)}${renderShelters(chibaLatest.shelters)}</div>`;
   }
 
   // 近隣鉄道の公式運行情報へのQR誘導（運行情報そのものは各社公式ページで確認）
@@ -199,13 +199,41 @@
     const evacuationActive=!!evac?.active && Number(evac?.level||0)>=3;
     const viewState=(data && data.level)?{...state,weather:data,weatherNames:Array.isArray(data.weatherNames)?data.weatherNames:[]}:state;
     document.body.className=evacuationActive ? (Number(evac.level)>=5?'emergency':Number(evac.level)===4?'danger':'warning') : viewState.cls;
-    const mainHtml=evacuationActive ? renderEvacuationMain(evac) : (viewState.level===0?renderNormal(viewState):renderAlert(viewState));
+
+    // 複数情報が同時発令された場合も、気象・避難・避難所を同一画面に収める。
+    // 避難情報は最上位表示、気象情報はその直下に配置する。
+    const mainHtml=evacuationActive
+      ? `${renderEvacuationMain(evac)}${viewState.level===0?renderNormal({...viewState,title:'気象情報',message:'現在、発表警報・注意報はありません。'}):renderAlert(viewState)}`
+      : (viewState.level===0?renderNormal(viewState):renderAlert(viewState));
+
     app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content">${mainHtml}${renderChibaInfo()}${renderRailway()}${renderMeta(data)}</div></div>`;
+    requestAnimationFrame(fitLayout);
+  }
+
+  function fitLayout(){
+    const content=document.querySelector('.screen-content');
+    if(!content)return;
+
+    const classes=['fit-compact-1','fit-compact-2','fit-compact-3','fit-critical'];
+    content.classList.remove(...classes);
+
+    // 画面高さに対して内容が収まるまで、段階的に圧縮する。
+    for(const cls of classes){
+      if(content.scrollHeight <= content.clientHeight + 2) break;
+      content.classList.add(cls);
+    }
+
+    // 最終段階でも余裕がない場合は、補助的な「発令なし」カードだけを省略する。
+    if(content.scrollHeight > content.clientHeight + 2){
+      content.classList.add('fit-critical');
+      content.classList.add('fit-hide-clear');
+    }
   }
 
   function renderError(message){
     latest={ok:false}; document.body.className='error';
     app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content"><section class="main-message error-panel"><div class="main-icon">!</div><div class="main-title">防災情報を取得できません</div><div class="main-description">${esc(message||'APIとの通信に失敗しました。')}</div><div class="retry-note">自動的に再取得します</div></section>${renderChibaInfo()}<section class="meta-card"><div class="meta-row"><span class="meta-label">対象地域</span><strong>千葉県船橋市</strong></div></section></div></div>`;
+    requestAnimationFrame(fitLayout);
   }
 
   function applyWeather(data){
@@ -213,7 +241,7 @@
     const alerts=getWeatherAlerts(data);
     const weather=weatherDisplay(alerts[0]||null);
     currentLevel=weather?.level||0;
-    render(states[currentLevel]||states[0],weather?{...weather,weatherNames:weatherNames(alerts),checkedAt:data.checkedAt}:{checkedAt:data.checkedAt});
+    render(states[currentLevel]||states[0],weather?{...weather,weatherNames:weatherNames(alerts),weatherCount:alerts.length,checkedAt:data.checkedAt}:{checkedAt:data.checkedAt});
   }
 
   async function fetchStatus(){
@@ -264,8 +292,11 @@
     const names=(params.get('weather')||'').split(',').map(x=>x.trim()).filter(Boolean);
     const list=names.length?names:defaults[n];
     const label={2:'注意報',3:'警報',4:'危険警報',5:'特別警報'}[n];
-    return {level:n,label,warning:list[0],title:list[0],message:`${list[0]}が発表されています。今後の気象情報と自治体からの避難情報を確認してください。`,updatedAt:new Date().toISOString(),weatherNames:list};
+    return {level:n,label,warning:list[0],title:list[0],message:`${list[0]}が発表されています。今後の気象情報と自治体からの避難情報を確認してください。`,updatedAt:new Date().toISOString(),weatherNames:list,weatherCount:list.length};
   }
+
+  window.addEventListener('resize',()=>requestAnimationFrame(fitLayout));
+  window.addEventListener('orientationchange',()=>setTimeout(fitLayout,150));
 
   function init(){
     startClock();
