@@ -123,6 +123,20 @@
     return `<section class="info-card evacuation-card is-active level-${level}"><div class="info-card-header"><span class="info-card-title">避難情報</span><span class="info-card-badge">${esc(label)}</span></div><div class="info-card-body"><div class="info-main-title">${esc(e?.title||'避難情報')}</div><div class="info-message">${esc(e?.message||'避難情報が発表されています。')}</div>${areas.length?`<div class="representative-label">主な対象地域</div><div class="representative-list">${areas.slice(0,3).map(x=>`<span>${esc(typeof x==='string'?x:(x.name||x.areaName||''))}</span>`).join('')}</div>`:''}${e?.updatedAt?`<div class="info-updated">発令・更新日時：${formatDate(e.updatedAt)}</div>`:''}<div class="info-source">情報提供：千葉県防災ポータルサイト</div></div></section>`;
   }
 
+  function renderEvacuationMain(e){
+    const level=Number(e?.level||0);
+    const cls=level>=5?'emergency':level===4?'danger':'warning';
+    const areas=Array.isArray(e?.representativeAreas)?e.representativeAreas:[];
+    return `<section class="main-message evacuation-main-panel ${cls}">
+      <div class="evacuation-main-banner"><span class="state-icon">!</span><span>警戒レベル${level} ${esc(e?.title||'避難情報')}</span></div>
+      <div class="warning-name">${esc(e?.title||'避難情報')}</div>
+      <div class="level-caption">${esc(e?.message||'避難情報が発表されています。')}</div>
+      ${areas.length?`<div class="evacuation-targets"><div class="weather-list-title">主な対象地域</div>${areas.slice(0,3).map(x=>`<div class="weather-list-row"><span>●</span><strong>${esc(typeof x==='string'?x:(x.name||x.areaName||''))}</strong></div>`).join('')}</div>`:''}
+      ${e?.updatedAt?`<div class="info-updated">発令・更新日時：${formatDate(e.updatedAt)}</div>`:''}
+      <div class="info-source">情報提供：千葉県防災ポータルサイト</div>
+    </section>`;
+  }
+
   function renderShelters(s){
     const active=!!s?.active, list=Array.isArray(s?.shelters)?s.shelters:[];
     const rows=list.slice(0,3).map(x=>`<div class="shelter-row"><div class="shelter-name">${esc(x.name||x.facilityName||'避難所')}</div></div>`).join('');
@@ -146,35 +160,10 @@
     </section>`;
   }
 
-  const railwayLinks=[
-    {name:'JR総武線',company:'JR東日本',qr:'images/qr_jr_sobu.png',url:'https://traininfo.jreast.co.jp/train_info/kanto.aspx',note:'総武快速線・中央・総武各駅停車を含む関東エリアの公式運行情報'},
-    {name:'京成本線',company:'京成電鉄',qr:'images/qr_keisei.png',url:'https://www.keisei.co.jp/',note:'京成線の公式運行情報'},
-    {name:'東武アーバンパークライン',company:'東武鉄道',qr:'images/qr_tobu.png',url:'https://www.tobu.co.jp/service_status/',note:'東武アーバンパークラインの公式運行情報'},
-    {name:'東京メトロ東西線',company:'東京メトロ',qr:'images/qr_tokyo_metro_tozai.png',url:'https://www.tokyometro.jp/unkou/history/touzai.html',note:'東西線の公式運行情報'}
-  ];
-
-  function renderRailwayInfo(){
-    return `<section class="railway-card">
-      <div class="railway-header">
-        <div><span class="railway-icon">🚃</span><span class="railway-title">鉄道運行情報</span></div>
-        <div class="railway-lead">最新の運行情報は各鉄道会社の公式サイトでご確認ください。</div>
-      </div>
-      <div class="railway-list">${railwayLinks.map(r=>`
-        <div class="railway-row">
-          <div class="railway-route"><div class="railway-company">${esc(r.company)}</div><div class="railway-name">${esc(r.name)}</div></div>
-          <div class="railway-status"><span class="official-dot">●</span><span>公式運行情報を確認</span><small>${esc(r.note)}</small></div>
-          <a class="railway-qr" href="${esc(r.url)}" target="_blank" rel="noopener" aria-label="${esc(r.name)}の公式運行情報を確認">
-            <img src="${r.qr}" alt="${esc(r.name)} 公式運行情報QRコード">
-            <span>公式サイト</span>
-          </a>
-        </div>`).join('')}</div>
-      <div class="railway-note">※運行状況の最新情報は、QRコードから各鉄道会社の公式運行情報をご確認ください。</div>
-    </section>`;
-  }
-
   function renderChibaInfo(){
-    if(!chibaLatest || chibaLatest.ok===false)return renderRailwayInfo();
-    return `<div class="municipal-section">${renderEvacuation(chibaLatest.evacuation)}${renderShelters(chibaLatest.shelters)}</div>${renderRailwayInfo()}`;
+    if(!chibaLatest || chibaLatest.ok===false)return '';
+    const evacuationActive=!!chibaLatest?.evacuation?.active;
+    return `<div class="municipal-section">${evacuationActive?'':renderEvacuation(chibaLatest.evacuation)}${renderShelters(chibaLatest.shelters)}</div>`;
   }
 
   function renderMeta(data){
@@ -182,9 +171,12 @@
   }
 
   function render(state,data=null){
-    document.body.className=state.cls;
+    const evac=chibaLatest?.evacuation;
+    const evacuationActive=!!evac?.active && Number(evac?.level||0)>=3;
     const viewState=(data && data.level)?{...state,weather:data,weatherNames:Array.isArray(data.weatherNames)?data.weatherNames:[]}:state;
-    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content">${viewState.level===0?renderNormal(viewState):renderAlert(viewState)}${renderChibaInfo()}${renderMeta(data)}</div></div>`;
+    document.body.className=evacuationActive ? (Number(evac.level)>=5?'emergency':Number(evac.level)===4?'danger':'warning') : viewState.cls;
+    const mainHtml=evacuationActive ? renderEvacuationMain(evac) : (viewState.level===0?renderNormal(viewState):renderAlert(viewState));
+    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content">${mainHtml}${renderChibaInfo()}${renderMeta(data)}</div></div>`;
   }
 
   function renderError(message){
@@ -211,6 +203,9 @@
 
   async function fetchChibaDisaster(){
     try{
+      // 既存の /api/chiba-disaster は避難所連携を含むため維持。
+      // 避難情報専用 /api/evacuation もWorker側に追加済みだが、画面では
+      // 既存レスポンスを利用して余計な通信を増やさない。
       const res=await fetch(`${CONFIG.API_BASE_URL}/api/chiba-disaster?ts=${Date.now()}`,{cache:'no-store'});
       if(!res.ok)throw new Error(`HTTP ${res.status}`);
       chibaLatest=await res.json();
@@ -226,7 +221,20 @@
     clockTimer=setInterval(()=>{const el=document.getElementById('clock');if(el)el.textContent=nowText();},1000);
   }
 
-  function demoChiba(){const shelterDemo=params.get('shelter')==='1';return {ok:true,evacuation:{active:false,level:0,title:'避難情報',message:'現在、船橋市から発表されている避難情報はありません。'},shelters:shelterDemo?{active:true,count:5,shelters:[{name:'船橋市立船橋小学校'},{name:'船橋市立海神小学校'},{name:'船橋市立湊中学校'},{name:'船橋市立宮本小学校'},{name:'船橋市立西海神小学校'}],sourceUrl:'https://www.bousai.pref.chiba.lg.jp/'}:{active:false,count:0,shelters:[],message:'現在、船橋市で開設中の避難所はありません.'}};}
+  function demoChiba(){
+    const shelterDemo=params.get('shelter')==='1';
+    // テストURLは evacuation=3 / 4 / 5 のいずれかを指定する。
+    // 不正値・未指定の場合は「発令なし」とする。
+    const evacParam=(params.get('evacuation')||'').trim();
+    const evac=['3','4','5'].includes(evacParam) ? Number(evacParam) : 0;
+    const evacuationMap={
+      3:{active:true,level:3,title:'高齢者等避難',message:'警戒レベル3　高齢者等避難が発令されています。危険な場所にいる高齢者等は避難を開始してください。',updatedAt:new Date().toISOString(),representativeAreas:[{name:'船橋市内 対象地域'}]},
+      4:{active:true,level:4,title:'避難指示',message:'警戒レベル4　避難指示が発令されています。危険な場所から全員避難してください。',updatedAt:new Date().toISOString(),representativeAreas:[{name:'船橋市内 対象地域'}]},
+      5:{active:true,level:5,title:'緊急安全確保',message:'警戒レベル5　緊急安全確保が発令されています。命を守るための最善の行動をとってください。',updatedAt:new Date().toISOString(),representativeAreas:[{name:'船橋市内 対象地域'}]}
+    };
+    const evacuation=evacuationMap[evac]||{active:false,level:0,title:'避難情報',message:'現在、船橋市から発表されている避難情報はありません。'};
+    return {ok:true,evacuation,shelters:shelterDemo?{active:true,count:5,shelters:[{name:'船橋市立船橋小学校'},{name:'船橋市立海神小学校'},{name:'船橋市立湊中学校'},{name:'船橋市立宮本小学校'},{name:'船橋市立西海神小学校'}],sourceUrl:'https://www.bousai.pref.chiba.lg.jp/'}:{active:false,count:0,shelters:[],message:'現在、船橋市で開設中の避難所はありません.'}};
+  }
 
   function demoWeather(level){
     const n=Number(level);
