@@ -66,62 +66,44 @@ body.emergency .alert-panel { border-color: var(--emergency); }
   .footer-info,.footer-info span { font-size:9px !important; }
 }
 
-/* ===== 鉄道運行情報：公式サイト＋QR ===== */
-.railway-card {
-  margin-top: 18px;
-  border: 2px solid #c8e1f5;
-  border-radius: 18px;
-  background: rgba(255,255,255,.98);
-  overflow: hidden;
-  box-shadow: 0 6px 18px rgba(10,50,90,.08);
+/* ===== 自治体発令の避難情報をメイン表示 ===== */
+.evacuation-main-panel {
+  border: 4px solid transparent;
+  padding: 0 4vw 2.2vh;
+  text-align: center;
 }
-.railway-header {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:18px;
-  padding: 16px 22px;
-  background: linear-gradient(135deg,#0759a8,#0d78c9);
-  color:#fff;
+.evacuation-main-panel.warning { border-color: var(--warning); }
+.evacuation-main-panel.danger { border-color: var(--danger); }
+.evacuation-main-panel.emergency { border-color: var(--emergency); }
+.evacuation-main-banner {
+  margin: 0 -4vw 2.2vh;
+  padding: 2vh 3vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1vw;
+  color: #fff;
+  font-size: clamp(28px,4.2vw,62px);
+  font-weight: 900;
+  border-radius: 23px 23px 10px 10px;
 }
-.railway-header > div:first-child { display:flex; align-items:center; gap:10px; }
-.railway-icon { font-size: 30px; line-height:1; }
-.railway-title { font-size: 30px; font-weight: 800; letter-spacing:.03em; }
-.railway-lead { font-size: 15px; font-weight: 700; opacity:.98; text-align:right; }
-.railway-list { padding: 8px 16px 10px; }
-.railway-row {
-  display:grid;
-  grid-template-columns: 1.15fr 1.45fr 92px;
-  align-items:center;
-  gap:18px;
-  min-height:118px;
-  padding: 10px 8px;
-  border-bottom:1px solid #dceaf5;
+.evacuation-main-panel.warning .evacuation-main-banner { background: var(--warning); }
+.evacuation-main-panel.danger .evacuation-main-banner { background: var(--danger); }
+.evacuation-main-panel.emergency .evacuation-main-banner { background: var(--emergency); }
+.evacuation-main-panel .warning-name { margin-top: .5vh; }
+.evacuation-main-panel .level-caption { font-size: clamp(20px,2.1vw,32px); line-height: 1.55; }
+.evacuation-targets {
+  margin-top: 1.5vh;
+  padding: 1.2vh 2vw;
+  border-radius: 16px;
+  background: #f3f7fa;
+  text-align: left;
 }
-.railway-row:last-child { border-bottom:0; }
-.railway-route { min-width:0; }
-.railway-company { color:#2b628d; font-size:13px; font-weight:700; margin-bottom:3px; }
-.railway-name { color:#132333; font-size:24px; font-weight:800; line-height:1.15; }
-.railway-status { color:#203746; font-size:16px; font-weight:700; }
-.official-dot { color:#1d9b56; font-size:20px; margin-right:6px; }
-.railway-status small { display:block; margin-top:5px; color:#6c7f8d; font-size:13px; line-height:1.35; font-weight:500; }
-.railway-qr {
-  width:108px;
-  text-decoration:none;
-  color:#0759a8;
-  text-align:center;
-  justify-self:end;
-  font-weight:800;
-  font-size:11px;
-}
-.railway-qr img { display:block; width:96px; height:96px; margin:0 auto 4px; image-rendering:auto; background:#fff; }
-.railway-note { padding: 7px 20px 12px; color:#71818d; font-size:11px; text-align:right; }
+.evacuation-main-panel .info-source { margin-top: 1vh; }
 
-@media (max-width: 900px) {
-  .railway-header { align-items:flex-start; flex-direction:column; }
-  .railway-lead { text-align:left; }
-  .railway-row { grid-template-columns: 1fr 78px; gap:12px; }
-  .railway-status { grid-column:1; grid-row:2; font-size:14px; }
-  .railway-qr { grid-column:2; grid-row:1 / span 2; }
-  .railway-name { font-size:20px; }
+@media (orientation:portrait) and (min-width:700px) {
+  .evacuation-main-panel { padding: 0 3vw 2vh; }
+  .evacuation-main-banner { margin: 0 -3vw 1.6vh; font-size: clamp(25px,4vw,42px); }
+  .evacuation-main-panel .warning-name { font-size: clamp(30px,4.8vw,50px); }
+  .evacuation-main-panel .level-caption { font-size: clamp(17px,2.1vw,25px); }
 }
