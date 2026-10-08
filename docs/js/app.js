@@ -206,13 +206,23 @@
       ? `${renderEvacuationMain(evac)}${viewState.level===0?renderNormal({...viewState,title:'気象情報',message:'現在、発表警報・注意報はありません。'}):renderAlert(viewState)}`
       : (viewState.level===0?renderNormal(viewState):renderAlert(viewState));
 
-    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content">${mainHtml}${renderChibaInfo()}${renderRailway()}${renderMeta(data)}</div></div>`;
+    const weatherCount=Number(viewState.weatherCount||0);
+    const shelterActive=!!chibaLatest?.shelters?.active;
+    const railwayPriority=!evacuationActive && !shelterActive && weatherCount<=1 && Number(viewState.level||0)<=2;
+    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content${railwayPriority?' railway-priority':''}">${mainHtml}${renderChibaInfo()}${renderRailway()}${renderMeta(data)}</div></div>`;
     requestAnimationFrame(fitLayout);
   }
 
   function fitLayout(){
     const content=document.querySelector('.screen-content');
     if(!content)return;
+
+    // 情報量が少ない平常時は、残った表示領域を鉄道QRエリアへ優先配分。
+    // 警報・避難情報・避難所開設時は、1画面収容を最優先する。
+    const railway=content.querySelector('.railway-section');
+    if(content.classList.contains('railway-priority') && railway){
+      railway.classList.add('railway-featured');
+    }
 
     const classes=['fit-compact-1','fit-compact-2','fit-compact-3','fit-critical'];
     content.classList.remove(...classes);
