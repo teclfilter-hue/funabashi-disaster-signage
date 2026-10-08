@@ -9,6 +9,14 @@ const CONFIG = {
 const JMA_WARNING_URL =
   `https://www.jma.go.jp/bosai/warning/data/r8/${CONFIG.prefectureCode}.json`;
 
+// 気象防災速報（JMA 防災情報XML）
+// 線状降水帯・記録的短時間大雨等の速報を、既存の警報APIとは独立して取得する。
+const JMA_EXTRA_FEED_URL = "https://www.data.jma.go.jp/developer/xml/feed/extra.xml";
+const WEATHER_BULLETIN_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+const WEATHER_BULLETIN_MAX_ITEMS = 3;
+let weatherBulletinCache = null;
+let weatherBulletinCacheAt = 0;
+
 let memoryCache = null;
 let memoryCacheAt = 0;
 
@@ -25,6 +33,11 @@ export default {
     if (url.pathname === "/api/status") {
       const data = await getStatus();
       return json(data);
+    }
+
+    if (url.pathname === "/api/weather-bulletin") {
+      const data = await getWeatherBulletins();
+      return json(data, data.ok ? 200 : 502);
     }
 
     if (url.pathname === "/api/chiba-disaster") {
@@ -53,7 +66,7 @@ export default {
       return json({
         ok: true,
         service: "funabashi-disaster-api",
-        version: "2026-09-16-multi-area-v2",
+        version: "2026-10-08-weather-bulletin-v1",
         area: CONFIG.cityName,
         checkedAt: new Date().toISOString()
       });
@@ -62,6 +75,138 @@ export default {
     return new Response("Not Found", {status:404});
   }
 };
+
+async function getWeatherBulletins() {
+  const now = Date.now();
+  if (weatherBulletinCache && now - weatherBulletinCacheAt < CONFIG.cacheSeconds * 1000) {
+    return weatherBulletinCache;
+  }
+
+  try {
+    const feedRes = await fetch(JMA_EXTRA_FEED_URL, {
+      headers: {"User-Agent": "Funabashi-Disaster-Signage/1.0"},
+      cf: {cacheTtl: 30, cacheEverything: true}
+    });
+    if (!feedRes.ok) throw new Error(`JMA XML feed HTTP ${feedRes.status}`);
+
+    const feed = await feedRes.text();
+    const entries = parseAtomEntries(feed)
+      .filter(e => /気象防災速報|府県気象防災速報/.test(e.title))
+      .slice(0, 8);
+
+    const items = [];
+    for (const entry of entries) {
+      const updatedAt = entry.updated || entry.published || null;
+      const t = updatedAt ? Date.parse(updatedAt) : NaN;
+      if (Number.isFinite(t) && now - t > WEATHER_BULLETIN_MAX_AGE_MS) continue;
+      if (!entry.url) continue;
+
+      try {
+        const detailRes = await fetch(entry.url, {
+          headers: {"User-Agent": "Funabashi-Disaster-Signage/1.0"},
+          cf: {cacheTtl: 30, cacheEverything: true}
+        });
+        if (!detailRes.ok) continue;
+        const xml = await detailRes.text();
+        const plain = xmlToPlainText(xml);
+
+        // 船橋市は千葉県の一次/二次細分区域に含まれるため、県名または市名を確認。
+        if (!/(千葉県|船橋市)/.test(plain)) continue;
+
+        const type = classifyWeatherBulletin(`${entry.title} ${plain}`);
+        if (!type) continue;
+
+        items.push({
+          type,
+          title: entry.title || type,
+          headline: extractXmlValue(xml, "Headline") || extractXmlValue(xml, "Title") || entry.title || type,
+          message: extractBulletinMessage(xml, type),
+          updatedAt,
+          source: "気象庁 気象防災速報",
+          sourceUrl: "https://www.jma.go.jp/bosai/information/"
+        });
+      } catch (_) {
+        // 個別電文の取得失敗は他の速報の表示を妨げない。
+      }
+      if (items.length >= WEATHER_BULLETIN_MAX_ITEMS) break;
+    }
+
+    items.sort((a,b) => Date.parse(b.updatedAt || 0) - Date.parse(a.updatedAt || 0));
+    const result = {
+      ok: true,
+      areaName: `${CONFIG.prefectureName}${CONFIG.cityName}`,
+      checkedAt: new Date().toISOString(),
+      source: "気象庁 気象防災速報",
+      sourceUrl: "https://www.jma.go.jp/bosai/information/",
+      items
+    };
+    weatherBulletinCache = result;
+    weatherBulletinCacheAt = now;
+    return result;
+  } catch (error) {
+    return {
+      ok: false,
+      areaName: `${CONFIG.prefectureName}${CONFIG.cityName}`,
+      checkedAt: new Date().toISOString(),
+      source: "気象庁 気象防災速報",
+      items: [],
+      error: String(error)
+    };
+  }
+}
+
+function parseAtomEntries(xml) {
+  const out = [];
+  const matches = String(xml || "").match(/<entry\b[\s\S]*?<\/entry>/gi) || [];
+  for (const block of matches) {
+    const title = decodeXml(extractXmlValue(block, "title"));
+    const updated = decodeXml(extractXmlValue(block, "updated"));
+    const published = decodeXml(extractXmlValue(block, "published"));
+    const linkMatch = block.match(/<link\b[^>]*href=["']([^"']+)["'][^>]*>/i);
+    out.push({title, updated, published, url: linkMatch ? decodeXml(linkMatch[1]) : ""});
+  }
+  return out;
+}
+
+function classifyWeatherBulletin(text) {
+  const s = String(text || "");
+  if (/線状降水帯.*発生|線状降水帯発生/.test(s)) return "線状降水帯発生";
+  if (/線状降水帯.*直前予測|線状降水帯直前予測/.test(s)) return "線状降水帯直前予測";
+  if (/記録的短時間大雨/.test(s)) return "記録的短時間大雨";
+  if (/短時間大雪/.test(s)) return "短時間大雪";
+  return null;
+}
+
+function extractBulletinMessage(xml, type) {
+  const candidates = [
+    extractXmlValue(xml, "Text"),
+    extractXmlValue(xml, "Body"),
+    extractXmlValue(xml, "Description"),
+    extractXmlValue(xml, "Headline")
+  ].filter(Boolean).map(decodeXml);
+  const msg = candidates.find(x => new RegExp(type.replace(/[.*+?^${}()|[\]\\]/g, "\\\\$&")).test(x)) || candidates[0];
+  if (msg) return msg.replace(/\s+/g, " ").trim().slice(0, 180);
+  if (type === "線状降水帯発生") return "線状降水帯による非常に激しい雨が同じ場所で降り続いている状況です。厳重に警戒してください。";
+  if (type === "線状降水帯直前予測") return "今後3時間以内に線状降水帯が発生する可能性が高まっています。最新情報を確認してください。";
+  if (type === "記録的短時間大雨") return "記録的な短時間の大雨が観測・解析されています。浸水や土砂災害に警戒してください。";
+  return "気象庁から重要な気象防災速報が発表されています。最新情報を確認してください。";
+}
+
+function extractXmlValue(xml, tag) {
+  const re = new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)</${tag}>`, "i");
+  const m = String(xml || "").match(re);
+  return m ? m[1].replace(/<[^>]+>/g, "").trim() : "";
+}
+
+function xmlToPlainText(xml) {
+  return decodeXml(String(xml || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " "));
+}
+
+function decodeXml(s) {
+  return String(s || "")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+}
 
 async function getStatus() {
   const now = Date.now();

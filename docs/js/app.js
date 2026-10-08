@@ -13,7 +13,7 @@
     5:{level:5,label:'特別警報',sub:'レベル5',title:'特別警報 発表中',message:'命を守る行動を最優先し、自治体の指示に従ってください。',icon:'!',cls:'emergency'}
   };
 
-  let currentLevel=0, latest=null, chibaLatest=null, timer=null, clockTimer=null;
+  let currentLevel=0, latest=null, chibaLatest=null, weatherBulletinLatest=null, timer=null, clockTimer=null;
 
   function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
   function formatDate(iso){
@@ -100,7 +100,8 @@
   }
   function renderAlert(s){
     const w=s.weather||{};
-    const names=Array.isArray(s.weatherNames)?s.weatherNames:[];
+    const maxWeatherAlerts=Number(CONFIG.CONTENT_POLICY?.maxWeatherAlerts||4);
+    const names=(Array.isArray(s.weatherNames)?s.weatherNames:[]).slice(0,maxWeatherAlerts);
     const total=Math.max(names.length, Number(s.weatherCount||0));
     return `<section class="main-message alert-panel">
       <div class="state-banner"><span class="state-icon">${s.icon}</span><span>${esc(w.label||s.label)} 発表中</span></div>
@@ -161,6 +162,26 @@
     </section>`;
   }
 
+  function renderWeatherBulletin(){
+    const maxItems=Number(CONFIG.CONTENT_POLICY?.maxWeatherBulletins||1);
+    const items=(Array.isArray(weatherBulletinLatest?.items)?weatherBulletinLatest.items:[]).slice(0,maxItems);
+    if(!items.length)return '';
+    const top=items[0];
+    const type=String(top.type||top.title||'気象防災速報');
+    const isLinear=/線状降水帯/.test(type);
+    const isRecord=/記録的短時間大雨/.test(type);
+    const cls=isLinear?'weather-bulletin-linear':isRecord?'weather-bulletin-record':'weather-bulletin-alert';
+    return `<section class="weather-bulletin ${cls}">
+      <div class="weather-bulletin-header"><span class="weather-bulletin-icon">!</span><span class="weather-bulletin-title">気象防災速報</span><span class="weather-bulletin-badge">${esc(type.replace(/^府県/,'').replace(/^気象防災速報[（(]/,'').replace(/[）)]$/,''))}</span></div>
+      <div class="weather-bulletin-body">
+        <strong>${esc(top.headline||top.title||type)}</strong>
+        <span>${esc(top.message||'気象庁から重要な気象防災速報が発表されています。最新情報を確認してください。')}</span>
+      </div>
+      ${items.length>1?`<div class="weather-bulletin-more">ほか${items.length-1}件の気象防災速報があります</div>`:''}
+      ${top.updatedAt?`<div class="info-updated">発表・更新日時：${formatDate(top.updatedAt)}</div>`:''}
+    </section>`;
+  }
+
   function renderChibaInfo(){
     if(!chibaLatest || chibaLatest.ok===false)return '';
     return `<div class="municipal-section">${renderEvacuation(chibaLatest.evacuation)}${renderShelters(chibaLatest.shelters)}</div>`;
@@ -177,17 +198,14 @@
   function renderRailway(){
     return `<section class="railway-section">
       <div class="railway-header">
-        <div class="railway-heading">
-          <div class="railway-icon" aria-hidden="true">🚆</div>
-          <div class="railway-title">鉄道運行情報</div>
-        </div>
-        <div class="railway-note">各社公式ページで最新の運行状況を確認できます。</div>
+        <div class="railway-title">鉄道運行情報</div>
+        <div class="railway-note">各社公式ページで最新の運行状況を確認</div>
       </div>
       <div class="railway-grid">
         ${railwayLinks.map(r=>`<a class="railway-card" href="${esc(r.url)}" target="_blank" rel="noopener" aria-label="${esc(r.name)}の公式運行情報を確認">
           <div class="railway-card-name">${esc(r.short)}</div>
-          <div class="railway-card-caption">公式運行情報</div>
           <img src="${esc(r.qr)}" alt="${esc(r.name)} 公式運行情報QRコード">
+          <div class="railway-card-caption">公式運行情報を確認</div>
         </a>`).join('')}
       </div>
     </section>`;
@@ -212,34 +230,29 @@
     const weatherCount=Number(viewState.weatherCount||0);
     const shelterActive=!!chibaLatest?.shelters?.active;
     const railwayPriority=!evacuationActive && !shelterActive && weatherCount<=1 && Number(viewState.level||0)<=2;
-    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content${railwayPriority?' railway-priority':''}">${mainHtml}${renderChibaInfo()}${renderRailway()}${renderMeta(data)}</div></div>`;
+    app.innerHTML=`<div class="screen-shell">${renderHeader()}<div class="screen-content${railwayPriority?' railway-priority':''}"><div class="disaster-area">${mainHtml}${renderWeatherBulletin()}${renderChibaInfo()}</div>${renderRailway()}${renderMeta(data)}</div></div>`;
     requestAnimationFrame(fitLayout);
   }
 
   function fitLayout(){
     const content=document.querySelector('.screen-content');
-    if(!content)return;
+    const disaster=document.querySelector('.disaster-area');
+    if(!content || !disaster)return;
 
-    // 情報量が少ない平常時は、残った表示領域を鉄道QRエリアへ優先配分。
-    // 警報・避難情報・避難所開設時は、1画面収容を最優先する。
-    const railway=content.querySelector('.railway-section');
-    if(content.classList.contains('railway-priority') && railway){
-      railway.classList.add('railway-featured');
-    }
+    content.classList.remove('fit-compact-1','fit-compact-2','fit-compact-3','fit-critical','fit-hide-clear');
+    disaster.classList.remove('fit-compact-1','fit-compact-2','fit-compact-3','fit-critical','fit-hide-clear');
 
+    // 鉄道エリアは常時固定ゾーン。防災情報側だけを段階的に圧縮する。
     const classes=['fit-compact-1','fit-compact-2','fit-compact-3','fit-critical'];
-    content.classList.remove(...classes);
-
-    // 画面高さに対して内容が収まるまで、段階的に圧縮する。
     for(const cls of classes){
-      if(content.scrollHeight <= content.clientHeight + 2) break;
+      if(disaster.scrollHeight <= disaster.clientHeight + 2) break;
+      disaster.classList.add(cls);
       content.classList.add(cls);
     }
 
-    // 最終段階でも余裕がない場合は、補助的な「発令なし」カードだけを省略する。
-    if(content.scrollHeight > content.clientHeight + 2){
-      content.classList.add('fit-critical');
-      content.classList.add('fit-hide-clear');
+    if(disaster.scrollHeight > disaster.clientHeight + 2){
+      disaster.classList.add('fit-critical','fit-hide-clear');
+      content.classList.add('fit-critical','fit-hide-clear');
     }
   }
 
@@ -264,6 +277,18 @@
       const data=await res.json();
       applyWeather(data);
     }catch(e){renderError(e.message);}
+  }
+
+  async function fetchWeatherBulletin(){
+    try{
+      const res=await fetch(`${CONFIG.API_BASE_URL}/api/weather-bulletin?ts=${Date.now()}`,{cache:'no-store'});
+      if(!res.ok)throw new Error(`HTTP ${res.status}`);
+      weatherBulletinLatest=await res.json();
+    }catch(e){
+      // 気象防災速報の取得失敗で既存の警報・避難情報表示を止めない。
+      weatherBulletinLatest={ok:false,items:[]};
+    }
+    if(latest)applyWeather(latest);
   }
 
   async function fetchChibaDisaster(){
@@ -317,13 +342,14 @@
       chibaLatest=demoChiba();
       const n=Number(params.get('level'));
       currentLevel=[0,2,3,4,5].includes(n)?n:0;
+      weatherBulletinLatest=params.get('bulletin')==='1'?{ok:true,items:[{type:'線状降水帯発生',title:'線状降水帯発生',headline:'線状降水帯による非常に激しい雨が続いています',message:'土砂災害や浸水害に厳重に警戒してください。',updatedAt:new Date().toISOString()}]}:{ok:true,items:[]};
       const demoWeatherData=demoWeather(currentLevel);
       render(states[currentLevel],demoWeatherData?{...demoWeatherData,checkedAt:new Date().toISOString()}:{ok:true,checkedAt:new Date().toISOString()});
       return;
     }
-    fetchStatus(); fetchChibaDisaster();
+    fetchStatus(); fetchChibaDisaster(); fetchWeatherBulletin();
     clearInterval(timer);
-    timer=setInterval(()=>{fetchStatus();fetchChibaDisaster();},CONFIG.REFRESH_MS||30000);
+    timer=setInterval(()=>{fetchStatus();fetchChibaDisaster();fetchWeatherBulletin();},CONFIG.REFRESH_MS||30000);
   }
   init();
 })();
