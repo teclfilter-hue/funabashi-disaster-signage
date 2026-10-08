@@ -458,7 +458,9 @@ html, body, #app {
 .screen-content.fit-compact-1 .weather-list-row { font-size: 13px !important; }
 .screen-content.fit-compact-1 .info-card-body { padding-top: .45vh !important; padding-bottom: .45vh !important; }
 .screen-content.fit-compact-1 .shelter-qr { width: 78px !important; }
-.screen-content.fit-compact-1 .railway-card img { width: 44px !important; height: 44px !important; }
+/* 鉄道QRは緊急時でも読み取りやすさを優先し、極端に縮小しない */
+.screen-content.fit-compact-1 .railway-section { flex: 0 0 19vh !important; min-height: 19vh !important; }
+.screen-content.fit-compact-1 .railway-card img { width: 90px !important; height: 90px !important; max-width: 100% !important; max-height: 100% !important; }
 
 .screen-content.fit-compact-2 {
   --content-gap: .55vh;
@@ -476,9 +478,9 @@ html, body, #app {
 .screen-content.fit-compact-2 .info-card-body { padding: .45vh 1vw !important; }
 .screen-content.fit-compact-2 .shelter-name { font-size: 14px !important; }
 .screen-content.fit-compact-2 .shelter-qr { width: 68px !important; }
-.screen-content.fit-compact-2 .railway-section { padding: .4vh .6vw !important; }
-.screen-content.fit-compact-2 .railway-card { padding: .3vh .3vw !important; }
-.screen-content.fit-compact-2 .railway-card img { width: 38px !important; height: 38px !important; }
+.screen-content.fit-compact-2 .railway-section { flex: 0 0 19vh !important; min-height: 19vh !important; padding: .55vh .6vw !important; }
+.screen-content.fit-compact-2 .railway-card { padding: .4vh .3vw !important; }
+.screen-content.fit-compact-2 .railway-card img { width: 85px !important; height: 85px !important; max-width: 100% !important; max-height: 100% !important; }
 
 .screen-content.fit-compact-3 {
   --content-gap: .3vh;
@@ -502,10 +504,12 @@ html, body, #app {
 .screen-content.fit-compact-3 .shelter-name { font-size: 12px !important; }
 .screen-content.fit-compact-3 .shelter-qr { width: 54px !important; }
 .screen-content.fit-compact-3 .shelter-qr span { font-size: 8px !important; }
-.screen-content.fit-compact-3 .railway-title { font-size: 13px !important; }
+.screen-content.fit-compact-3 .railway-section { flex: 0 0 19vh !important; min-height: 19vh !important; padding: .45vh .5vw !important; }
+.screen-content.fit-compact-3 .railway-title { font-size: 15px !important; }
 .screen-content.fit-compact-3 .railway-note { display: none; }
-.screen-content.fit-compact-3 .railway-card img { width: 32px !important; height: 32px !important; }
-.screen-content.fit-compact-3 .railway-card-name { font-size: 9px !important; }
+.screen-content.fit-compact-3 .railway-card { padding: .35vh .2vw !important; }
+.screen-content.fit-compact-3 .railway-card img { width: 80px !important; height: 80px !important; max-width: 100% !important; max-height: 100% !important; }
+.screen-content.fit-compact-3 .railway-card-name { font-size: 11px !important; }
 .screen-content.fit-compact-3 .railway-card-caption { display: none; }
 
 /* 最終段階：重要情報を残して補助説明だけを圧縮 */
@@ -530,9 +534,10 @@ html, body, #app {
 .screen-content.fit-critical .info-card-body { padding-top: .2vh !important; padding-bottom: .2vh !important; }
 .screen-content.fit-critical .shelter-name { font-size: 10px !important; }
 .screen-content.fit-critical .shelter-qr { width: 45px !important; }
-.screen-content.fit-critical .railway-card { padding: .15vh .2vw !important; }
-.screen-content.fit-critical .railway-card img { width: 27px !important; height: 27px !important; }
-.screen-content.fit-critical .railway-card-name { font-size: 8px !important; }
+.screen-content.fit-critical .railway-section { flex: 0 0 19vh !important; min-height: 19vh !important; padding: .35vh .45vw !important; }
+.screen-content.fit-critical .railway-card { padding: .3vh .15vw !important; }
+.screen-content.fit-critical .railway-card img { width: 76px !important; height: 76px !important; max-width: 100% !important; max-height: 100% !important; }
+.screen-content.fit-critical .railway-card-name { font-size: 10px !important; }
 
 /* 43インチ縦型を想定した標準値 */
 @media (orientation: portrait) and (min-width: 700px) {
@@ -670,6 +675,25 @@ html, body, #app {
 .screen-content.fit-compact-2.railway-priority .railway-card img,
 .screen-content.fit-compact-3.railway-priority .railway-card img,
 .screen-content.fit-critical.railway-priority .railway-card img {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+/* 災害時も鉄道QRは「確認できる大きさ」を維持する。
+   平常時の railway-priority は上記の大きなQRを使用し、
+   警報・避難情報が増えた場合だけ高さを約19vhに固定して他領域を圧縮する。 */
+@media (orientation: portrait) and (min-width: 700px) {
+  .screen-content:not(.railway-priority) .railway-section {
+    flex: 0 0 19vh !important;
+    min-height: 19vh !important;
+  }
+  .screen-content:not(.railway-priority) .railway-card img {
+    width: clamp(76px, 8.5vw, 105px) !important;
+    height: clamp(76px, 8.5vw, 105px) !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+  .screen-content:not(.railway-priority) .railway-card-name {
+    font-size: clamp(11px, 1.15vw, 17px) !important;
+  }
 }
