@@ -177,14 +177,17 @@
   function renderRailway(){
     return `<section class="railway-section">
       <div class="railway-header">
-        <div class="railway-title">鉄道運行情報</div>
-        <div class="railway-note">各社公式ページで最新の運行状況を確認</div>
+        <div class="railway-heading">
+          <div class="railway-icon" aria-hidden="true">🚆</div>
+          <div class="railway-title">鉄道運行情報</div>
+        </div>
+        <div class="railway-note">各社公式ページで最新の運行状況を確認できます。</div>
       </div>
       <div class="railway-grid">
         ${railwayLinks.map(r=>`<a class="railway-card" href="${esc(r.url)}" target="_blank" rel="noopener" aria-label="${esc(r.name)}の公式運行情報を確認">
           <div class="railway-card-name">${esc(r.short)}</div>
+          <div class="railway-card-caption">公式運行情報</div>
           <img src="${esc(r.qr)}" alt="${esc(r.name)} 公式運行情報QRコード">
-          <div class="railway-card-caption">公式運行情報を確認</div>
         </a>`).join('')}
       </div>
     </section>`;

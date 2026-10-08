@@ -861,3 +861,155 @@ html, body, #app {
     height: clamp(88px, 11vw, 130px) !important;
   }
 }
+
+
+/* =========================================================
+   鉄道情報デザイン改訂：鉄道会社ロゴを使用せず、鉄道名を明確に表示
+   添付イメージを基準に、画面下部の独立エリアとして視認性を確保
+   ========================================================= */
+.railway-section {
+  border: 2px solid #0878d1 !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  box-shadow: 0 5px 14px rgba(0,30,60,.08) !important;
+  padding: .65vh 1vw .8vh !important;
+}
+
+.railway-header {
+  min-height: 4.5vh !important;
+  margin: 0 0 .55vh !important;
+  padding: .35vh .75vw !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1vw !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+  background: linear-gradient(180deg, #0878d1 0%, #0066b3 100%) !important;
+}
+
+.railway-heading {
+  display: flex !important;
+  align-items: center !important;
+  gap: .55vw !important;
+  min-width: 0 !important;
+}
+
+.railway-icon {
+  width: 1.55em !important;
+  height: 1.55em !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 auto !important;
+  font-size: clamp(22px, 2.4vw, 36px) !important;
+  line-height: 1 !important;
+  filter: grayscale(1) brightness(0) invert(1) !important;
+}
+
+.railway-title {
+  color: #fff !important;
+  font-size: clamp(20px, 2.15vw, 32px) !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  letter-spacing: .02em !important;
+  white-space: nowrap !important;
+}
+
+.railway-note {
+  color: rgba(255,255,255,.96) !important;
+  font-size: clamp(10px, .95vw, 15px) !important;
+  line-height: 1.2 !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+.railway-grid {
+  gap: .7vw !important;
+}
+
+.railway-card {
+  border: 2px solid #0878d1 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: #09233d !important;
+  text-decoration: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: .15vh !important;
+  padding: .5vh .5vw !important;
+}
+
+.railway-card-name {
+  color: #09233d !important;
+  font-size: clamp(17px, 1.7vw, 26px) !important;
+  line-height: 1.1 !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+
+.railway-card-caption {
+  color: #174a76 !important;
+  font-size: clamp(10px, .95vw, 14px) !important;
+  line-height: 1.1 !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+
+.railway-card img {
+  width: clamp(72px, 8vw, 112px) !important;
+  height: clamp(72px, 8vw, 112px) !important;
+  object-fit: contain !important;
+  margin-top: .15vh !important;
+  background: #fff !important;
+}
+
+.railway-card:hover,
+.railway-card:focus-visible {
+  border-color: #005fae !important;
+  box-shadow: 0 0 0 3px rgba(8,120,209,.15) !important;
+  outline: none !important;
+}
+
+/* 発令時も鉄道情報エリアの視認性を優先して維持 */
+.screen-content > .railway-section .railway-card img,
+.screen-content.fit-compact-1 > .railway-section .railway-card img,
+.screen-content.fit-compact-2 > .railway-section .railway-card img,
+.screen-content.fit-compact-3 > .railway-section .railway-card img,
+.screen-content.fit-critical > .railway-section .railway-card img {
+  width: clamp(76px, 8.5vw, 112px) !important;
+  height: clamp(76px, 8.5vw, 112px) !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+@media (orientation: portrait) and (min-width: 700px) {
+  .railway-header {
+    min-height: 4.8vh !important;
+    padding: .35vh .9vw !important;
+  }
+  .railway-icon {
+    font-size: clamp(24px, 2.7vw, 40px) !important;
+  }
+  .railway-title {
+    font-size: clamp(22px, 2.25vw, 34px) !important;
+  }
+  .railway-card-name {
+    font-size: clamp(19px, 2vw, 30px) !important;
+  }
+  .railway-card-caption {
+    font-size: clamp(11px, 1.05vw, 16px) !important;
+  }
+  .railway-card img {
+    width: clamp(86px, 9vw, 120px) !important;
+    height: clamp(86px, 9vw, 120px) !important;
+  }
+}
+
+@media (max-height: 1100px) {
+  .railway-header { min-height: 4vh !important; }
+  .railway-card-name { font-size: clamp(16px, 1.7vw, 24px) !important; }
+  .railway-card img { width: clamp(72px, 8vw, 100px) !important; height: clamp(72px, 8vw, 100px) !important; }
+}
