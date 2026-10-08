@@ -1133,3 +1133,51 @@ html, body, #app {
     max-height:clamp(30px,3.5vw,50px) !important;
   }
 }
+
+/* ===== 鉄道運行情報：元の青色バー＋提供アイコン／青枠カード ===== */
+.screen-content > .railway-section .railway-header {
+  background: #07548c !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  padding: .65vh 1vw !important;
+  margin-bottom: .8vh !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+}
+
+.screen-content > .railway-section .railway-title {
+  color: #fff !important;
+}
+
+.screen-content > .railway-section .railway-title-icon {
+  max-width: clamp(28px, 3.2vw, 48px) !important;
+  max-height: clamp(28px, 3.2vw, 48px) !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  flex: 0 1 auto !important;
+}
+
+.screen-content > .railway-section .railway-note {
+  color: #fff !important;
+  opacity: .95 !important;
+}
+
+.screen-content > .railway-section .railway-card {
+  border: 2px solid #07548c !important;
+  background: #fff !important;
+}
+
+.screen-content > .railway-section .railway-card:hover,
+.screen-content > .railway-section .railway-card:focus-visible {
+  border-color: #07548c !important;
+  outline: 3px solid rgba(7,84,140,.18) !important;
+  outline-offset: 1px !important;
+}
+
+@media (orientation: portrait) and (min-width: 700px) {
+  .screen-content > .railway-section .railway-title-icon {
+    max-width: clamp(30px, 3.5vw, 50px) !important;
+    max-height: clamp(30px, 3.5vw, 50px) !important;
+  }
+}
