@@ -1101,3 +1101,35 @@ html, body, #app {
     height:clamp(88px,10.5vw,120px) !important;
   }
 }
+
+/* 鉄道運行情報タイトルの画像アイコン：提供画像を自動縮小して収める */
+.screen-content > .railway-section .railway-title {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:.55vw !important;
+  min-width:0 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+}
+.screen-content > .railway-section .railway-title-icon {
+  flex:0 1 auto !important;
+  width:auto !important;
+  height:auto !important;
+  max-width:clamp(28px,3.2vw,48px) !important;
+  max-height:clamp(28px,3.2vw,48px) !important;
+  object-fit:contain !important;
+  object-position:center !important;
+  display:block !important;
+}
+.screen-content > .railway-section .railway-title > span {
+  min-width:0 !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+@media (orientation:portrait) and (min-width:700px) {
+  .screen-content > .railway-section .railway-title-icon {
+    max-width:clamp(30px,3.5vw,50px) !important;
+    max-height:clamp(30px,3.5vw,50px) !important;
+  }
+}

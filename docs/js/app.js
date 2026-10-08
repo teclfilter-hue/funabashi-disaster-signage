@@ -198,7 +198,7 @@
   function renderRailway(){
     return `<section class="railway-section">
       <div class="railway-header">
-        <div class="railway-title">鉄道運行情報</div>
+        <div class="railway-title"><img class="railway-title-icon" src="images/railway_title_icon.png" alt=""> <span>鉄道運行情報</span></div>
         <div class="railway-note">各社公式ページで最新の運行状況を確認</div>
       </div>
       <div class="railway-grid">
